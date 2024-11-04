@@ -1,0 +1,1 @@
+export("ErgosRenyi", "locToVec", "vec", "vecToA")

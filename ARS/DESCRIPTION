@@ -1,0 +1,9 @@
+Package: ARS
+Type: Package
+Title: A package to storage my code for some Network analysis tasks
+Version: 1.0
+Date: 2024-11-03
+Author: Michel Mendivenson Barragán Zabala
+Maintainer: <mbarraganz@unal.edu.co>
+Description: A la fecha, el paquete solamente incluye funciones para generar una matriz de adyacencia con el método Ergos-Renyi, un método para vectorizar matrices de adyacencia y a partir de la vectorización armar la matriz de adyacencia, y para armar el vector de localizaciones para la vectorización de la matriz de adyacencia así como una función para obtener la forma vectorizada de la matriz a partir de la vectorización de la matriz. 
+License: Nope
