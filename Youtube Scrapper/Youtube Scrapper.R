@@ -84,6 +84,3 @@ for (i in 1:nrow(categories)) {
 # ----------------------------------------------------------------------------------------------
 
 save(categories, videos, file = 'Youtube Scrapper/videos.RData')
-
-
-
