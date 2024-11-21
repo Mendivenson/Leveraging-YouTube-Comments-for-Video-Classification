@@ -1,0 +1,139 @@
+### **8. Considere el conjunto de datos dado en `addhealth.RData` recopilado por *The National Longitudinal Study of Adolescent Health*, asociado con un estudio escolar sobre salud y comportamientos sociales de adolescentes de varias escuelas en los Estados Unidos. Los participantes nominaron hasta 5 niños y 5 niñas como amigos y reportaron el número de actividades extracurriculares en las que participaron juntos. El archivo `addhealth.RData` contiene una lista con dos arreglos, `X` y `E`. `X` tiene tres campos: `female` (0 = No, 1 = Sí), `race` (1 = Blanco, 2 = Negro, 3 = Hispano, 4 = Otro). `E` también tiene tres campos: `V1` (vértice de "salida") `V2` (vértice de "llegada") `activities` (número de actividades extracurriculares).**
+
+
+```{r}
+load('../Data/addhealth.RData')
+```
+
+> **a.** Identificar las variables nodales.
+
+```{r, class.source='fold-show'}
+colnames(dat$X)
+```
+
+Dentro del archivo `dat$X` está conformado por tres columnas:
+
+- Género
+- Raza
+- Grado
+
+De las cuales las tres son variables nodales.
+
+> **b.** Identificar y clasificar las variables relacionales.
+
+```{r, class.source='fold-show'}
+colnames(dat$E)
+```
+
+En cuanto a las variables relacionales, sólo se encuentra la variable `activities` en la que se relaciona una variable de peso de la interacción entre dos nodos (Cantidad de actividades) por lo que tenemos una red ponderada y no dirigida.
+
+
+> **c.** Calcular el orden, el tamaño, y el diámetro del grafo.
+
+Note que existen nodos aislados pues en la lista de variables nodales se tienen: 
+
+```{r, class.source = 'fold-show'}
+cat(nrow(dat$X),'variables')
+```
+
+Mientras que en la lista de aristas se registran:
+
+```{r, class.source='fold-show'}
+cat(length(unique(c(dat$E[,"V1"], dat$E[,"V2"]))), 'aristas.')
+```
+
+Sin embargo, en un principio si creamos un objeto con 255 vertices en `igraph` y añadimos los enlaces luego deberían quedar completos los vértices. 
+
+```{r, class.source='fold-show'}
+G = make_empty_graph(n = 255, directed = F)
+G = add_edges(G,edges = t(dat$E[,c('V1','V2')]))
+```
+
+
+```{r}
+cat('El grafo generado cuenta con',gorder(G),'nodos.')
+```
+Por lo que finalmente para el grafo completo se tendrá que:
+
+```{r, echo = FALSE}
+Punto8 = list('graph' = G, 'order' = gorder(G),
+              'size' = gsize(G), 'diameter' = diameter(G))
+
+for (i in 2:4){
+  cat('The', names(Punto8)[i], 'of the graph is:', Punto8[[i]], '\n')
+}
+
+```
+
+> **d.** Graficar la red sin tener en cuenta las variables nodales.
+
+```{r, fig.align='center', fig.height=8, fig.width=8}
+set.seed(1305)
+layout <- layout_with_kk(G)
+
+# Con el layout Kamada-Kawai los nodos desconectados tienden a quedar o dentro del grafo o
+# afuera del área gráfica por lo que se reubican dentro de un área no tan "poblada" de la
+# representación del grafo.
+
+layout[degree(G) == 0, ] <- cbind(runif(sum(degree(G) == 0), -8, -4),
+                                  runif(sum(degree(G) == 0), 6, 8))
+# lay = layout_nicely(G)
+# lay = layout_with_kk(G)
+# lay = layout_with_graphopt(G, charge = 0.0001, mass = 180)
+rotate_layout <- function(layout, theta) {
+  rotation_matrix <- matrix(c(cos(theta), -sin(theta), sin(theta), cos(theta)), nrow = 2)
+  t(rotation_matrix %*% t(layout))
+}
+
+# layout <- rotate_layout(layout, (1 * pi )/8 )
+
+# Se utilizaron colores distintos para verificar dónde estaban quedando ubicados
+# los nodos aislados
+colores = rep(adjustcolor('darkslategray4', 0.4), 255)
+colores[degree(G) == 0] = adjustcolor('salmon', 0.6)
+coloresFrame = rep('darkslategray4', 255)
+coloresFrame[degree(G) == 0] = 'salmon'
+
+# Colores por género
+# colores = rep(adjustcolor('darkslategray4', 0.4), 255)
+# colores[dat$X[,"female"] == 1] = adjustcolor('salmon', 0.6)
+# coloresFrame = rep('darkslategray4', 255)
+# coloresFrame[dat$X[,"female"] == 1] = 'salmon'
+# La razón de los dos grupos que se muestran no está relacionada con el género
+
+par(mar = c(0,3,0,0))
+plot.igraph(Punto8$graph, edge.arrow.size = 0.1, layout = layout,
+            vertex.color = colores, 
+            vertex.frame.color = coloresFrame, 
+            edge.color = adjustcolor('gray', alpha = 0.8),
+            vertex.label = NA, 
+            vertex.size = 2.5,
+            edge.width = 1.8,
+            edge.curved = 0)
+# title(main = 'Relationships between students', col = 'black', font = 2, cex.main = 1.5, 
+#       line = -0.8, side = 2)
+mtext(bquote(bold('Relationships between students')), side = 2, cex = 1.6, line = 0.8, las = 3,
+      col = adjustcolor('black', alpha = 0.7))
+mtext('The red dots represent the isolated nodes.', side = 1, line = -3, 
+      col = adjustcolor('black', alpha = 0.8), font = 2, cex = 0.7, 
+      adj = 0.99, outer = T)
+```
+
+
+> **e.** Identificar el top 5 de los nodos más propensos a emitir/recibir relaciones. 
+
+Los nodos más propensos a emitir o recibir relaciones (En una red no dirigida) son aquellos con un grado más alto:
+
+```{r, class.source='fold-show'}
+grados = degree(G)
+grados = cbind('Nodo' = 1:255, 'Grado' = grados)
+grados = as.data.frame(grados) %>% 
+  mutate(Grado = as.numeric(Grado)) %>%
+  arrange(desc(Grado))
+```
+
+```{r, echo = FALSE}
+kableExtra::kable(head(grados, n = 5)) %>%
+  kable_styling(full_width = FALSE, position = "center")
+```
+

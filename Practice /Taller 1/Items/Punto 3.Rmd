@@ -1,0 +1,94 @@
+### **3. Una triada es un subgrafo generado por una tripla de vértices.**
+
+> **a.** Graficar todos los posibles estados relacionales de una triada.
+
+```{r}
+cat('Para este caso habrán', 2 ** (choose(3, 2)), 'posibles estados con', choose(3,2), 'posibles enlaces.')
+```
+
+Para este caso, además de las funciones de `igraph` utilizaremos la función `combn` de `Rbase` para generar dos cosas principalmente
+
+- `edges = combn(c(1,2,3), 2, simplify = F)`: Genera todas las posibles conexiones entre nodos. Es decir, genera todas las combinaciones posibles de dos pares entre los nodos, tenga en cuenta que esto se hace suponiendo que el grado sea no dirigido pues la función `combn` no tiene en cuenta el orden de los nodos. Como `simplify = F` se generará un objeto de tipo lista donde cada elemento de esa lista es un par de nodos (Arista) de tipo vector numérico.
+
+- `combn(edges, k, simplify = F)`: Genera todas las combinaciones de k aristas posibles a partir de la lista dada por la función anterior. Tenga en cuenta que en este caso, se tendrán a lo sumo $\binom{3}{2} = 3$ aristas en el grafo por lo que no podemos utilizar $k > 3$ o la función devolverá un error. En este caso se retornará nuevamente una lista de las posibles aristas para cada caso.
+
+Finalmente, como se tiene una lista de aristas no es posible pasar directamente esta lista a `igraph` para crear el grafo y además si un nodo no está dentro de las aristas no se dibujará, por esto se genera un grafo vacío de 3 nodos para ponerle los vértices después con `add_edges` a partir del vector numérico generado con  `unlist` a cada una de las listas de aristas. 
+
+```{r, class.source='fold-show'}
+# En general se pueden construir 2** (kC2) grafos
+edges = combn(c(1,2,3), 2, simplify = F)                      # Conexiones posibles
+grafos = list('one edge' = combn(edges, 1, simplify = F),     # Todas las combinaciones de 1 conexión posibles
+              'two edges' = combn(edges, 2, simplify = F),    # TOdas las combinaciones de 2 conexiones posibles
+              'three edges' = combn(edges, 3, simplify = F))  # TOdas las combinaciones de 3 conexiones posibles
+
+empty = make_empty_graph(n = 3, directed = FALSE)             # Este es un grafo vacío
+for (i in 1:3){
+  for (j in 1:length(grafos[[i]])){
+    grafos[[i]][[j]] = add_edges(graph = empty,               # Al grafo vacío se le agregan los enlaces o aristas
+                                 edges = unlist(grafos[[i]][[j]]))
+  }
+}
+
+grafos$`no edges`[[1]] = empty                                # El caso 'base' o el grafo desconectado
+```
+
+
+```{r, fig.align='center', fig.width=12, fig.height=6}
+par(mfrow = c(2,4), mar = c(1,3,2,3))
+for (i in names(grafos)){
+  for (j in grafos[[i]]){
+    set.seed(1305)
+    plot(j,
+         edge.arrow.size = 0.1, edge.color = 'black', edge.width = 1.5,
+         vertex.label.color = 'black', vertex.label.cex = 2.5,
+         vertex.color = 'gray', vertex.frame.color = NA, vertex.size = 40)
+    title(main = i, cex.main = 1.5, font = 2)
+    # mtext(i, side = 3, line = -1, col = 'darkgray', font = 2, cex = 0.8)
+  }
+  mtext('All possible graphs with 3 nodes', side = 1, line = -1.6, 
+      col = adjustcolor('dodgerblue4', alpha = 0.25), font = 2, 
+      cex = 1.3, adj = 0.99, outer = T)
+}
+```
+
+
+> **b.** Identificar los estados isomorfos.
+
+La librería `igraph` ya tiene implementada la función `isomorphic` para determinar si dos grafos dados son o no isomorfos. Sin embargo, sólo funciona con dos grafos simultáneamente por lo que la siguiente implementación revisa uno por uno cada uno de los grafos que tienen la misma cantidad de aristas para definir un representante de cada isomorfismo. 
+
+```{r, class.source='fold-show'}
+for (i in names(grafos)){
+  graphs = grafos[[i]]
+  if (length(graphs) > 1){
+    iso = rep(F, length(graphs))
+    for (j in 1:length(graphs)){
+      if (!iso[j]){
+        flags = unlist(lapply(graphs, function(x) isomorphic(x,graphs[[j]])))
+        flags[j] = F
+        iso = iso | flags 
+      }
+    }
+    grafos[[i]] = grafos[[i]][!iso]
+  }
+}
+```
+
+***Nota:** Tenga en cuenta que se están haciendo cálculos reiterados innecesarios pues dentro de `lapply` se revisa siempre si existe o no isomorfismo entre el grafo actual y los grafos hacia delante del grafo actual, el grafo actual, pero también los grafos hacia atrás que ya han sido revisados antes por lo que puede cambiarse este parte para cuando se requieran revisar los isomorfismos de los grafos con mayor cantidad de nodos.*
+
+```{r, fig.align='center', fig.width=16, fig.height=4}
+par(mfrow = c(1,4), mar = c(0,3,2,3))
+for (i in names(grafos)){
+  for (j in 1:length(grafos[[i]])){
+    set.seed(1305)
+    plot(grafos[[i]][[j]],
+         edge.arrow.size = 0.1, edge.color = 'black', edge.width = 1.5,
+         vertex.label.color = 'black', vertex.label.cex = 2.5,
+         vertex.color = 'gray', vertex.frame.color = NA, vertex.size = 40)
+    title(main = i, cex.main = 2.5, font = 2)
+    # mtext(i, side = 3, line = -2.1, col = 'darkgray', font = 2, cex = 1.3)
+  }
+}
+mtext('All isomorphic graphs with 3 nodes', side = 1, line = -1.6, 
+      col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, 
+      cex = 1.5, adj = 0.99, outer = T)
+```

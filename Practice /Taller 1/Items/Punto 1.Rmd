@@ -1,0 +1,90 @@
+### **1. Considere el grafo $\scriptsize{\mathbf{G=(V,E)}}$, con $\scriptsize{\mathbf{V=\{1,2,3,4,5\}}}$ y $\scriptsize{\mathbf{E=\{ \{1,2\}; \{1,3\}; \{2,3\}; \{2,4\}; \{2,5\}; \{3,5\}; \{4,5\} \}}}$.**
+    
+
+> **a.** Graficar $G$.
+
+Usando la librería igraph podemos generar directamente el grafo a partir de la lista de aristas con la función `graph_from_edgelist`. Esta función requiere como entrada una matriz $k \times 2$ siendo $k$ el tamaño del grafo, teniendo en cuenta que si el nodo no aparece dentro de la lista de aristas no se añadirá al grafo, en cambio se deberán agregar estos nodos desconectados a partir de la función `add_vertices`:
+  
+```{r, class.source = 'fold-show'}
+edges = matrix(ncol = 2, byrow = T, data = c(1, 2,
+                                             1, 3,
+                                             2, 3,
+                                             2, 4,
+                                             2, 5, 
+                                             3, 5, 
+                                             4, 5))
+G = graph_from_edgelist(el = edges, directed = F)
+```
+
+
+```{r, fig.align='center', fig.cap='Graph Item 1'}
+set.seed(1305)
+par(mar = c(0,0,3,0))
+plot.igraph(G, edge.arrow.size = 0.1,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5,
+            main = 'Undirected graph (Item 1)')
+```
+
+
+>  **b.** Calcular el orden, el tamaño, y el diámetro del grafo.
+
+En este caso, se pueden utilizar varias funciones del paquete `igraph` para el mismo fin:
+
+- **Orden:** `gorder`, `vcount`
+- **Tamaño:** `gsize`, `ecount`
+- **Diámetro:** `diameter`
+
+***Nota:** Para todas las funciones se recibe como único argumento el grafo.*
+  
+```{r, class.source='fold-show'}
+Punto1 = list('graph' = G, 'order' = gorder(G),
+              'size' = gsize(G), 'diameter' = diameter(G))
+```
+
+
+```{r}
+for (i in 2:4){
+  cat('The', names(Punto1)[i], 'of the graph is:', Punto1[[i]], '\n')
+}
+```
+  
+>  **c.** Calcular el grado de cada vértice. 
+  
+La función `degree` de la librería `igraph` nos ayuda a conocer el grado de cada vertice:
+  
+```{r}
+Punto1$degree = cbind('Node' = 1:5, 'Degree' = degree(G))
+```
+
+```{r, echo =FALSE}
+kableExtra::kable(Punto1$degree) %>%
+  kable_styling(full_width = FALSE, position = "center")
+```
+
+
+>  **d.** Graficar el subgrafo generado por los nodos 1, 2, 3, y 4.
+  
+En este caso, no es necesario generar un nuevo grafo (Aunque podríamos simplemente eliminar los nodos que no queremos elegir) pues la función `subgraph` genera el subgrafo utilizando los nodos que le indiquemos:
+  
+```{r, class.source='fold-show'}
+Punto1$subgraph = subgraph(graph = G, vids =  c(1,2,3,4))
+```
+
+
+```{r, fig.align='center', fig.cap = 'Subgraph item 2'}
+set.seed(1305)
+par(mar = c(0,0,3,0))
+plot.igraph(Punto1$subgraph, edge.arrow.size = 0.1,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5,
+            main = 'Undirected graph (Item 1)')
+mtext(bquote(bold('Subgraph with 1,2,3 and 4 nodes')), side = 3, line = -0.5, 
+      col = 'gray')
+```

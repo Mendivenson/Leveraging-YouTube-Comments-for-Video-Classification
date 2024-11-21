@@ -1,0 +1,127 @@
+### **5. Escribir una rutina que reconstruya la matriz de adyacencia a partir de la matriz de aristas y una lista de vértices aislados (si los hay). Probar esta rutina con una red no dirigida de 25 nodos simulada a partir de enlaces aleatorios independientes e idénticamente distribuidos con probabilidad de éxito 0.1. Graficar la red de prueba.**
+
+Primero necesitamos generar un grafo con la probabilidad dada bien sea dirigido o no dirigido. Para eso, se crea la función `genEdgelist` que recibe la cantidad de nodos, si el grafo es o no dirigido y la probabiidad de éxito:
+
+- Primero se mapean todos los posibles enlaces entre dos vértices del grafo. (Con la función `combn`)
+- Luego se generan unos y ceros (Unos para si el enlace está presente en el grafo y cero si no) para cada enlace.
+- La matriz de enlaces estará definida por aquellos enlaces que se marcaron con 1.
+
+```{r, class.source='fold-show'}
+genEdgelist = function(n = 10, directed = T, prob = 0.1){
+  nodes = seq(1:n)
+  edges = t(combn(nodes,2, simplify = T))
+  if (directed){
+    edges = rbind(edges,
+                  cbind(edges[,2], edges[,1]))
+  }
+  selected = rbinom(n = nrow(edges), size = 1, prob = prob)
+  edges = edges[(selected == 1),]
+  return(list('nodes' = n, 'edges' = edges))
+}
+```
+
+***Nota:** Como se tiene que hay nodos que pueden no quedar conectados se devuelve también el número de nodos totales. Sin embargo, esta función no genera nodos con nombres.*
+
+```{r, class.source = 'fold-show'}
+set.seed(1305)
+edgeList = genEdgelist(n = 25, directed = F, prob = 0.1)
+```
+
+Tenga en cuenta que las etiquetas de salida y entrada en el caso de grafos no dirigidos se vuelven irrelevantes
+
+```{r, echo = FALSE}
+library(kableExtra)
+colnames(edgeList$edges) = c('Salida', 'Entrada')
+kableExtra::kable(t(edgeList$edges), caption = 'Edge list matrix')
+cat('Se seleccionaron', nrow(edgeList$edges), 'vértices de', choose(25,2), 'vértices posibles.')
+```
+
+
+Crearemos un grafo a partir de la matriz de aristas de forma que podamos comparar este y el grafo generado a partir de la matriz de adyacencia luego: 
+
+```{r, class.source='fold-show'}
+G = make_empty_graph(n = 25, directed = F)
+G = add_edges(G, edges = t(edgeList$edges))
+```
+
+La función encargada de recuperar la matriz de adyacencia a partir de la matriz de aristas y una lista de nodos desconectados funciona de la siguiente forma: 
+
+- Se extraen los nombres de los nodos.
+- Se crea una matriz de $n \times n$ donde $n$ es la cantidad de nodos que se encontraron.
+- Se llena la matriz poniendo 1 en las coordenadas $(i, j)$ dadas en la matriz $k \times 2$ de aristas.
+- En el caso de que se tenga un grafo no dirigido se suma la matriz anterior con su transpuesta y esta será la matriz de salida
+
+***Nota:** Esta función puede manejar directamente las etiquetas de los nodos por lo que modificamos la matriz de aristas para que tenga texto en cambio de números.*
+
+```{r, class.source='fold-show'}
+edges = matrix(as.character(edgeList$edges), ncol = 2, byrow = F)
+```
+
+Los nodos desconectados se pueden encontrar así:
+```{r, class.source='fold-show'}
+nodes = as.character(seq(1:25))
+nodes = setdiff(nodes, 
+                unique(c(unique(edges[,2]),
+                         unique(edges[,1]))))
+```
+
+```{r, echo = FALSE}
+cat('Los nodos:', nodes, 'son los nodos que están desconectados.')
+```
+
+```{r, class.source='fold-show'}
+AdjFromEdges = function(edges, vertices = NULL, directed = F){
+ nodes = c(unique(c(unique(edges[,2]),
+                    unique(edges[,1]))),
+           vertices) 
+ A = matrix(0,ncol = length(nodes), 
+           nrow = length(nodes))
+ colnames(A) = rownames(A) = nodes
+ A[edges] = 1
+ if (!directed){
+   A = A + t(A)
+ }
+ return(A)
+}
+
+# Aplicandolo al grafo de ejemplo:
+A = AdjFromEdges(edges = edges, vertices = nodes, directed = F)
+```
+
+
+```{r}
+# Esto se hace solamente con el fin de que se los gráfico se generen con el mismo layout
+A = A[as.character(seq(1:25)), as.character(seq(1:25))]
+```
+
+```{r, class.source='fold-show'}
+G1 = graph_from_adjacency_matrix(A, mode = 'undirected')
+```
+
+```{r, fig.align = 'center', fig.width=12, fig.height=8, fig.cap = 'Graph from adjacency matrix vs graph from edge list matrix'}
+par(mfrow = c(1,2))
+set.seed(1305)
+plot.igraph(G, edge.arrow.size = 0.1,
+            vertex.color = 'gray', 
+            vertex.size = 18,
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            vertex.label.cex = 1.5,
+            edge.width = 1.5)
+title(main = "Adjacency matrix", cex.main = 1.6, font = 2)
+set.seed(1305)
+plot.igraph(G1, edge.arrow.size = 0.1,
+            vertex.color = 'gray', 
+            vertex.size = 18,
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            vertex.label.cex = 1.5,
+            edge.width = 1.5)
+title(main = "Edge list matrix", cex.main = 1.6, font = 2)
+
+a = as_adjacency_matrix(G, sparse = F)
+b = as_adjacency_matrix(G1, sparse = F)
+cat('Se encontraron exactamente',sum(a != b), 'diferencias entre los dos grafos.')
+```

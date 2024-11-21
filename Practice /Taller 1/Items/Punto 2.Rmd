@@ -1,0 +1,73 @@
+### **2. Considere el digrafo $\scriptsize{\mathbf{G=(V,E)}}$, con $\scriptsize{\mathbf{V=\{1,2,3,4,5\}}}$ y $\scriptsize{\mathbf{E=\{(1,3); (2, 3); (2, 4); (2, 5); (3, 1); (3, 5); (4, 5); (5, 4)\}}}$.**
+
+Este punto es muy similar al anterior, se utiliza la misma estructura y funciones:
+
+> **a.** Graficar $G$.
+
+```{r, class.source='fold-show'}
+edges = matrix(ncol = 2, byrow = T, data = c(1, 3,
+                                             2, 3,
+                                             2, 4,
+                                             2, 5,
+                                             3, 1, 
+                                             3, 5, 
+                                             4, 5,
+                                             5, 4))
+G = graph_from_edgelist(el = edges, directed = T)
+```
+
+
+```{r, fig.align = 'center', fig.cap = 'Subgraph item 2'}
+set.seed(1305)
+par(mar = c(0,0,3,0))
+plot.igraph(G, edge.arrow.size = 0.4,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5,
+            main = 'Directed graph (Item 2)')
+```
+
+
+> **b.** Calcular el orden, el tamaño, y el diámetro del grafo.
+
+```{r, class.source='fold-show'}
+Punto2 = list('graph' = G, 'order' = gorder(G),
+              'size' = gsize(G), 'diameter' = get_diameter(G))
+```
+
+
+```{r}
+for (i in 2:4){
+  cat('The', names(Punto2)[i], 'of the graph is:', Punto2[[i]], '\n')
+}
+
+```
+
+> **c.** Calcular el grado de cada vértice del grafo.
+
+```{r}
+Punto2$degree = cbind('nodes' = 1:5, 'degree' = degree(G))
+# cat('The degree for each node is:\n')
+print(Punto2$degree)
+```
+
+> **d.** Graficar el subgrafo generado por los nodos 1, 2, 3, y 4.
+
+```{r, fig.align = 'center', fig.cap = 'Subgraph item 2'}
+Punto2$subgraph = subgraph(graph = G, vids =  c(1,2,3,4))
+
+set.seed(1305)
+par(mar = c(0,0,3,0))
+plot.igraph(Punto2$subgraph, edge.arrow.size = 0.4,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5,
+            main = 'Directed graph (Item 2)')
+mtext(bquote(bold('Subgraph with 1,2,3 and 4 nodes')), side = 3, line = -0.5, 
+      col = 'gray')
+
+```

@@ -1,0 +1,68 @@
+### **11. Sintetizar y explicar el problema de los puentes de Königsberg**
+
+El problema de los **puentes de Königsberg**, también conocido como el problema de los siete puentes, parte de una premisa sencilla:  
+
+**Dado un sistema de siete puentes que conectan cuatro áreas, ¿es posible cruzar cada puente exactamente una vez visitando todas las áreas?**
+
+En particular, si los puentes están organizados de la siguiente manera:
+
+```{r echo=FALSE, out.width='40%', fig.align='center'}
+knitr::include_graphics("Images/Konigsberg_bridges.png")
+```
+
+Por más que se intente resolver, la respuesta es simple: **no es posible recorrer los siete puentes sin repetir alguno de ellos**. Esta conclusión fue alcanzada por Leonhard Euler, quien además sentó las bases de la teoría de grafos como herramienta matemática para resolver problemas como este.
+
+
+#### **Representación del problema como grafo**
+
+Cada isla o área puede representarse como un nodo en un grafo, y cada puente se convierte en una arista entre los nodos. De esta forma, el problema de los puentes de Königsberg se modela como el siguiente grafo:
+
+```{r, class.source = 'fold-show'}
+g = make_empty_graph(n = 4, directed = T)
+g = add_edges(graph = g, edges = c(1,2,1,2,1,3,2,
+                                    3,2,4,2,4,3,4), 
+              directed = T)
+```
+
+
+```{r, fig.width=6.5, fig.height=6.5, fig.align='center'}
+layout = matrix(c(0, 1, 
+                  -1, 0,
+                  1, 0, 
+                  0, -1), 
+                ncol = 2, byrow = T)
+par(mar = c(0,0,2.3,0))
+plot.igraph(g, edge.arrow.size = 0,
+            layout = layout,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black',
+            main = 'El problema de los \n puentes de Königsberg')
+```
+
+#### **Condiciones para un recorrido Euleriano**
+
+La tarea consiste en pasar por todas las aristas del grafo exactamente una vez. Hoy en día, este tipo de recorrido se conoce como camino euleriano. Según Euler, solo existen dos escenarios en los que esta tarea es posible:
+
+- **Si el grafo tiene exactamente dos nodos con grado impar:** El recorrido debe comenzar en uno de los nodos de grado impar y terminar en el otro.
+
+- **Si todos los nodos tienen grado par:** El recorrido puede comenzar y terminar en el mismo nodo.
+
+
+> Cualquier grafo que cumpla con alguna de estas dos puede ser recorrido por un camino Euleariano.
+
+#### **Aplicación al grafo de Königsberg**
+
+El grafo que representa el problema tiene los siguientes grados:
+
+```{r, class.source='fold-show'}
+grados = degree(g)
+```
+
+```{r, echo = FALSE}
+kableExtra::kable(cbind('Nodo' = 1:4, 'Grado' = grados)) %>%
+  kable_styling(full_width = FALSE, position = "center")
+```
+
+Es decir, todos los nodos tienen grado impar. Por lo tanto, el grafo **no cumple con las condiciones necesarias para un camino Euleriano** y no es posible resolver el problema de los puentes de Königsberg.

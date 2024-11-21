@@ -1,0 +1,120 @@
+### **9. Considere el conjunto de datos dado en `conflict.RData` recopilado por Mike Ward y Xun Cao del departamento de Ciencias Políticas de la Universidad de Washington, asociado con datos de conflictos entre países en los años 90. El archivo `conflict.RData` contiene una lista con tres arreglos, `X`, `Y`, y `D`. `X` tiene tres campos: `population` (población en millones), `gdp` (PIB en millones de dolares) `polity` (puntuación política, un índice de democracia). `Y` hace referencia a una matriz $\scriptsize{\mathbf{Y}=[y_{i,j}]}$ en la que $\scriptsize{y_{i,j}}$ representa el número de conflictos iniciados por el país $i$ hacia el país $j$. Finalmente, `D`es un arreglo de tres dimensiones dimensiones cuya tercera dimensión contiene indices entre cada par de países asociados con: comercio (dimensión 1), importaciones (dimensión 2), organizaciones intergubernamentales (dimensión 3), y distancia geográfica (dimensión 4).**
+
+```{r, class.source='fold-show'}
+load(file = '../Data/conflict.RData')
+str(dat)
+```
+
+
+> **a.** Identificar las variables nodales.
+
+Las variables nodales serán solamente aquellas que se encuentran disponibles en `dat$X` pues las variables dentro de `dat$D` son variables de los enlaces como tal mientras que lo que se encuentra guardado en `dat$Y` es la matriz de adyacencia. 
+
+```{r, class.source = 'fold-show'}
+colnames(dat$X)
+```
+
+Las variables nodales son:
+
+- `population`: Población del país.
+- `gdp`: PIB del país en millones de doláres.
+- `polity`: Puntuación política del país.
+
+> **b.** Identificar y clasificar las variables relacionales.
+
+```{r}
+dimnames(x = dat$D)[[3]]
+```
+
+En este caso, las variables relacionales son: 
+
+- `polity_int`: Comercio entre dos países.
+- `imports`: Importaciones entre dos países.
+- `shared_igos`: Organizaciones intergubernamentales entre dos países.
+- `distance`: Distancia geográfica entre dos países.
+
+***Nota:** Si bien no todos los países están conectados por la variable de conflicto, para todos los países sí existen estas variables por lo que es sencillo obtener las variables relacionadas con los pares relacionados por conflicto.*
+
+> **c.** Calcular el orden, el tamaño, y el diámetro del grafo.
+
+De una vez creamos el objeto de tipo `igraph` y guardamos todos los atributos preguntados en una lista: 
+
+```{r, echo = TRUE}
+G = graph_from_adjacency_matrix(dat$Y, mode = 'directed', weighted = T)
+Punto9 = list('graph' = G, 'order' = gorder(G),
+              'size' = gsize(G), 'diameter' = diameter(G))
+
+for (i in 2:4){
+  cat('The', names(Punto9)[i], 'of the graph is:', Punto9[[i]], '\n')
+}
+
+```
+Teniendo en cuenta que la matriz de adyacencia representa el número de conflictos iniciados por un país $i$ con un país $j$ la red que tenemos es dirigida y ponderada.
+
+> **d.** Graficar la red sin tener en cuenta las variables nodales.
+
+```{r, fig.align='center', fig.width=8, fig.height=8}
+set.seed(1305)
+# layout <- layout_with_kk(G)
+layout = layout_with_fr(G)
+par(mar = c(0,1,0,0))
+plot.igraph(Punto9$graph, edge.arrow.size = 0.1, layout = layout,
+            vertex.color = adjustcolor('darkslategray4', 0.4), 
+            vertex.frame.color = 'darkslategray4', 
+            edge.color = adjustcolor('gray', alpha = 0.8),
+            vertex.label = NA, 
+            vertex.size = 2.9,
+            edge.width = 1.8,
+            edge.curved = 0)
+mtext(bquote(bold('Conflictos iniciados entre países')), side = 2, cex = 1.6, las = 3, line = -0.95,
+      col = adjustcolor('black', alpha = 0.7))
+```
+
+> **e.** Identificar el top 5 de los nodos más propensos a emitir/recibir relaciones de acuerdo con los conflictos. 
+
+Los nodos más propensos a emitir o recibir relaciones (En una red no dirigida) son aquellos con un grado más alto:
+
+```{r, class.source='fold-show'}
+grados = degree(G, mode = 'all')
+grados = cbind('Nodo' = names(grados), 'Grado' = grados)
+grados = as.data.frame(grados) %>% 
+  mutate(Grado = as.numeric(Grado)) %>%
+  arrange(desc(Grado))
+```
+
+```{r, echo = FALSE}
+kableExtra::kable(head(grados, n = 5), row.names = F) %>%
+  kable_styling(full_width = FALSE, position = "center")
+```
+
+Por otro lado, al ser una red dirigida podemos ver el top 5 por popularidad:
+
+```{r, class.source='fold-show'}
+grados = degree(G, mode = 'in')
+grados = cbind('Nodo' = names(grados), 'Grado' = grados)
+grados = as.data.frame(grados) %>% 
+  mutate(Grado = as.numeric(Grado)) %>%
+  arrange(desc(Grado))
+```
+
+```{r, echo = FALSE}
+kableExtra::kable(head(grados, n = 5), row.names = F) %>%
+  kable_styling(full_width = FALSE, position = "center")
+```
+
+Y sociabilidad:
+
+```{r, class.source='fold-show'}
+grados = degree(G, mode = 'out')
+grados = cbind('Nodo' = names(grados), 'Grado' = grados)
+grados = as.data.frame(grados) %>% 
+  mutate(Grado = as.numeric(Grado)) %>%
+  arrange(desc(Grado))
+```
+
+```{r, echo = FALSE}
+kableExtra::kable(head(grados, n = 5), row.names = F) %>%
+  kable_styling(full_width = FALSE, position = "center")
+```
+
+***Nota:** Teniendo en cuenta que el grado no tiene en cuenta la cantidad de conflictos inciada entre un papis y otro.*

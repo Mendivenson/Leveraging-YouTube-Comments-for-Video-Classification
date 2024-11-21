@@ -1,0 +1,36 @@
+### **12. Sintetizar y explicar la paradoja de la amistad (https://www.youtube.com/watch?v=E5f68Xbtd6s&ab_channel=Derivando).**
+
+La paradoja de la amistad es un fenómeno en redes sociales que parece contraintuitivo: "En promedio, tus amigos tienen más amigos que tú". Esta observación, aunque sorprendente, tiene una explicación matemática relacionada con las propiedades de los grafos que representan redes sociales.
+
+#### **Explicación matemtica**
+
+En una red social, los nodos representan personas y las aristas representan amistades entre ellas. La paradoja surge porque los nodos con mayor grado (es decir, las personas más populares) tienen más conexiones y, por tanto, son más propensos a aparecer como amigos de otros nodos.
+
+En términos más técnicos:
+
+- Si seleccionamos un nodo al azar y calculamos el grado medio de sus vecinos, este grado medio será mayor que el grado del nodo original.
+
+- Esto ocurre porque los nodos con más conexiones contribuyen más al promedio ponderado del grado de los vecinos.
+
+#### **Ejemplo**
+
+Supongamos una pequeña red:
+
+- Persona A tiene 2 amigos (B y C).
+- Persona B tiene 4 amigos (A, C, D, E).
+- Persona C tiene 3 amigos (A, B, F).
+
+En este caso:
+
+- Grado promedio de A: Los amigos de A (B y C) tienen grados 4 y 3. El promedio es (4 + 3)/2 = 3.5.
+- Grado de A: Es 2.
+
+**Conclusión:** Los amigos de A, en promedio, tienen más amigos que A.
+
+#### **Aplicaciones:**
+
+La paradoja de la amistad tiene implicaciones prácticas en estudios de redes:
+
+1. Propagación de información: Las personas con más conexiones (hubs) juegan un papel crucial en la difusión de información o contagios en la red.
+2. Percepción social: Puede influir en cómo las personas perciben su popularidad relativa, causando un sesgo en la autoevaluación.
+3. Diseño de estrategias: Para intervenciones en redes, como campañas de vacunación o marketing, identificar nodos clave es esencial.

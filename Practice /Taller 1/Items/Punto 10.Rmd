@@ -1,0 +1,178 @@
+### **10. Sintetizar y replicar la sección 2.4.2 (*Special Types of Graphs*, p. 24) de *Statistical Analysis Of Network Data With R* (Kolaczyk y Csárdi, 2020).**
+
+Existen muchos tipos de grafos, y entre ellos algunos importantes para el análisis estadístico de redes sociales especialmente por la estructura como tal del grafo:
+
+**GRAFOS COMPLETAMENTE CONECTADOS:** Un grafo en el que cualquier vértice está conectado a cualquier otro vértice. Es decir, la matriz de adyacencia debería de verse como una matriz cuya triangular superior e inferior son unos: 
+
+```{r, class.source='fold-show'}
+g =  make_full_graph(n = 7, directed = F)
+```
+
+```{r, echo = FALSE}
+kableExtra::kable(as_adjacency_matrix(g, sparse = F), 
+                  caption = 'Matriz de adyacencia para grafo completamente conectado (Con 7 nodos)')
+```
+
+Y debería verse así: 
+
+```{r, fig.width=6, fig.height=6}
+set.seed(1305)
+par(mar = c(0,0,0,0))
+plot.igraph(g, edge.arrow.size = 0.4,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5)
+mtext('A complete graph with 7 nodes.', side = 1, line = -1.2, 
+      col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, cex = 1.1, adj = 0.99, outer = T)
+```
+
+> ***Nota:** Este tipo de grafos son especialmente útiles cuando se quieren estudiar sub grafos completos dentro de redes más complejos (En inglés clique).*
+
+**GRAFO REGULAR:** Es aquel grafo en el que todos los vértices tienen el mismo grado sin excepción:
+
+```{r, class.source='fold-show'}
+g =  make_ring(n = 7, directed = F)
+```
+
+La matriz de adyacencia del grafo debería sumar lo mismo en todas sus filas y columnas:
+
+```{r, echo = FALSE}
+kableExtra::kable(as_adjacency_matrix(g, sparse = F), 
+                  caption = 'Matriz de adyacencia para grafo regular (Con 7 nodos)')
+```
+
+Y debería verse así: 
+
+```{r, fig.width=6, fig.height=6}
+set.seed(1305)
+par(mar = c(0,0,0,0))
+plot.igraph(g, edge.arrow.size = 0.4,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5)
+mtext('A regular graph with 7 nodes.', side = 1, line = -1.2, 
+      col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, cex = 1.1, adj = 0.99, outer = T)
+```
+
+> ***Nota:** Cuando el grafo tiene el grado común $k$ el grafo se llama $k$ regular*
+
+**ÁRBOL:** Un grafo conectado sin ciclos (i.e. No es posible volver a un vértice partiendo desde sí mismo). En general este tipo de grafos es importante como una estructura de datos en algoritmos computacionales. Un grafo de este tipo debería verse así:
+
+```{r, class.source='fold-show'}
+g = make_tree(n = 7, children = 2, mode = 'undirected')
+```
+
+```{r, fig.width=6, fig.height=6}
+set.seed(1305)
+par(mar = c(0,0,0,0))
+plot.igraph(g, edge.arrow.size = 0.4,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5)
+mtext('A tree graph with 7 nodes.', side = 1, line = -1.2, 
+      col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, cex = 1.1, adj = 0.99, outer = T)
+```
+
+Además de esto, cuando el grafo es dirigido tenemos un vértice especial llamado raíz que es un vértice desde el cual se puede llegar a cualquier otro vértice del árbol: 
+
+```{r, class.source='fold-show'}
+g = make_tree(n = 7, children = 2, mode = 'out')
+```
+
+```{r, fig.width=6, fig.height=6}
+set.seed(1305)
+par(mar = c(0,0,0,0))
+plot.igraph(g, edge.arrow.size = 0.4,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5)
+mtext('A directed tree graph with 7 nodes.', side = 1, line = -1.2, 
+      col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, cex = 1.1, adj = 0.99, outer = T)
+```
+
+Por ejemplo, en este caso, la raíz del árbol sería el número 1. También se puede hablar de hojas: Los últimos vértices del árbol desde los cuáles no se puede llegar a ningún otro vértice; ancestros: aquellos vértices antes de un vértice partiendo desde la raíz (Sin contar las hojas) y finalmente os descendientes que es la definición contraria de ancestro. Un ancestro inmediato es llamado *padre* y un descendiente inmediato es llamado *hijo*.
+
+Finalmente, existe dos tipos especiales de grafo:
+
+Uno llamado *DAG (Directed Acyclic graph)* que es un grafo con la estructura del árbol que realmente no es un árbol por la dirección de sus enlaces:
+
+```{r, class.source='fold-show'}
+g = make_tree(n = 7, children = 2, mode = 'in')
+```
+
+```{r, fig.width=6, fig.height=6}
+set.seed(1305)
+par(mar = c(0,0,0,0))
+plot.igraph(g, edge.arrow.size = 0.4,
+            layout = layout_as_tree(g),
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5)
+mtext('A DAG with 7 nodes.', side = 1, line = -1.2, 
+      col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, cex = 1.1, adj = 0.99, outer = T)
+```
+
+Y una $k$-estrella que sí es un árbol, pero que solamente tiene una raíz y hojas (Para ser específico tiene $k$ hojas).
+
+```{r, class.source='fold-show'}
+g = make_star(n = 7, mode = 'undirected')
+```
+
+```{r, fig.width=6, fig.height=6}
+set.seed(1305)
+par(mar = c(0,0,0,0))
+plot.igraph(g, edge.arrow.size = 0.4,
+            vertex.color = 'gray', 
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            edge.width = 1.5)
+mtext('A 7-star graph.', side = 1, line = -1.2, 
+      col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, cex = 1.1, adj = 0.99, outer = T)
+```
+
+
+> ***Nota:** Cuando se tienen varios árboles disjuntos en una sola red se llama bosque.*
+
+**GRAFOS BIPARTITOS:** Un grafo $G = (V, E)$ donde el conjunto de vértices $V$ puede ser dividido en dos conjuntos disjuntos $V_1$ y $V_2$ y en el que el conjunto de aristas conecta solamente vértices de $V_1$ con vértices en $V_2$ (O viceversa en el caso de ser dirigido.)
+
+Es decir, un grafo bipartito representa relaciones entre dos conjuntos de individuos que pueden representar inidividuos de distinta naturaleza (por ejemplo Actores y películas, empleados y empresas, etc).
+
+Generalmente, estos grafos se representan así:
+
+
+```{r, class.source='fold-show'}
+g <- graph_from_literal(actor1:actor2:actor3,movie1:movie2, actor1:actor2 - movie1, actor2:actor3 - movie2)
+V(g)$type <- grepl("^movie", V(g)$name)
+```
+
+
+```{r, fig.width=6, fig.height=6}
+set.seed(1305)
+
+plot(g, layout= -layout_as_bipartite(g)[,2:1],
+     vertex.size=60, vertex.shape=ifelse(V(g)$type,
+                                         "rectangle", "circle"),
+     vertex.label.cex=1.5,
+     vertex.label.color = 'black',
+     vertx.label.font = 3,
+     vertex.color=ifelse(V(g)$type, adjustcolor('salmon', 0.6),
+                         adjustcolor('darkslategray4', 0.8)),
+     vertex.frame.color=ifelse(V(g)$type, 'salmon', 'darkslategray4'),
+     edge.color = 'black')
+
+mtext('Bipartite graph', side = 1, line = -1.2,
+      col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, cex = 1.1, adj = 0.99, outer = T)
+```
+
+De estos grafos especiales, se pueden derivar grafos $V_1 - V_1$ o $V_2 - V_2$. Es decir, grafos de vertices del mismo conjunto cuyas conexiones representan si un actor actuó con otro actor en la misma película por ejemplo o si una película tiene el mismo actor que otra por ejemplo.

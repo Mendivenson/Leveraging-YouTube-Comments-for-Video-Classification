@@ -1,0 +1,110 @@
+---
+title: "**Taller 1. Análisis de redes sociales**"
+subtitle: 'Estadística. Universidad Nacional de Colombia'
+author: 
+  - name: "[Michel Mendivenson Barragán Zabala](mbarraganz@unal.edu.co)"
+date: "`r Sys.Date()`"
+output: # github_document
+    # always_allow_html: true
+  html_document:
+    theme: cosmo
+    toc: no
+    code_folding: hide
+    highlight: pygments
+    code_download: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', collapse = F)
+```
+
+```{r message=FALSE, warning=FALSE, class.source = 'fold-show'}
+library(igraph)
+library(dplyr)
+library(kableExtra)
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child='Items/Punto 1.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 2.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 3.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 4.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 5.Rmd'}
+```
+
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 6.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 7.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 8.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+  
+```{r child = 'Items/Punto 9.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 10.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 11.Rmd'}
+```
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+```{r child = 'Items/Punto 12.Rmd'}
+```

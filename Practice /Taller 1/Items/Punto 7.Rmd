@@ -1,0 +1,60 @@
+
+### **7. Hacer una rutina que simule redes tanto dirigidas como no dirigidas a partir de enlaces aleatorios independientes e idénticamente distribuidos con una probabilidad de éxito dada. Esta rutina debe tener como argumentos el orden de la red, la probabilidad de interacción (por defecto 0.5), el tipo de red (por defecto como no dirigida) y la semilla (por defecto 42), y además, tener como retorno la matriz de adyacencia y una visualización. Probar esta rutina generando cuatro casos diferentes. **
+
+Note que la función `ErgosRenyi` ya sirve como base para lo que se desea construir. Sin embargo, se deben agregar como argumento la semilla y como salida la visualización del grafo. Así pues, podemos o modificar completamente la función o utilizar una función para llamar esa función agregandolé lo que nos hace falta. Se modificará la función original y se le pondrá otro nombre:
+
+```{r, class.source='fold-show'}
+Punto7 = function(n = 25, symmetrical = TRUE, prob = 0.5, seed = 42){
+  A = matrix(0, ncol = n, nrow = n)
+  set.seed(seed)
+  edges = rbinom(n = (n*(n-1))/2, size = 1, prob = prob)
+  A[upper.tri(A)] = edges
+  if (symmetrical){
+    A = A + t(A)
+  } else {
+    edges = rbinom(n = (n*(n-1))/2, size = 1, prob = prob)
+    A[lower.tri(A)] = edges
+  }
+  
+  # =====> Gráfico
+  par(mar = c(2.5, 2.5, 2.5, 2.5))
+  cols = c('white', '#8B0000')
+  image( 1:nrow(A), 1:ncol(A),  A[,seq(nrow(A),1)], 
+         col = cols, xlab = '', ylab = '', axes = F)
+  axis(3, at = 1:ncol(A), labels = 1:nrow(A), las = 2, col = 'darkgray', tick = F)
+  axis(2, at = 1:nrow(A), labels = nrow(A):1, las = 2, col = 'darkgray', tick = F)
+  for (i in 1:nrow(A)) {
+    abline(h = i - 0.5, col = "darkgray", lwd = 0.5)  # Líneas horizontales
+    abline(v = i - 0.5, col = "darkgray", lwd = 0.5)  # Líneas verticales
+  }
+  mtext(bquote(bold('Adjacency matrix')), col = 'darkgray', side = 1, outer = F, adj = 1, line = 1)
+  box(col = 'darkgray')
+  map = recordPlot()
+  return(list('Adjacency matrix' = A, 'Heatmap' = map))
+}
+```
+
+
+Se comprobará para los siguientes casos para un grafo del mismo orden (30):
+
+- Gráfico dirigido y no dirigido
+- Con probabilidad 0.5 y 0.99
+
+```{r, class.source='fold-show', fig.show='show', fig.width=7.5, fig.height=7.5, fig.cap = 'Heatmap comparison'}
+sym = c(TRUE, FALSE)
+prob = c(0.5, 0.8)
+
+# Definir el layout
+layout(matrix(c(0,0,1,2,3,4), ncol = 2, byrow = T), heights = c(0.2,1.6,1.6))
+
+# Continuar con tu código original
+lista = list()
+for (i in sym){
+  for (j in prob){
+    lista[[paste('directed:', i, 'prob:', j)]] = Punto7(n = 30, symmetrical = i, prob = j, 
+                                                        seed = rbinom(n = 1, size = 20, prob = 0.5))
+    mtext(paste('directed:', i, 'prob:', j), font = 2, side = 1, adj = -0.1,
+          cex = 0.8, line = 0.7)
+  }
+}
+```

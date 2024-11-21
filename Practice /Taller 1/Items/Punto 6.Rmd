@@ -1,0 +1,117 @@
+### **6. Escribir una rutina que reconstruya la matriz de aristas y una lista de vértices asilados (si los hay) a partir de la matriz de adyacencia. Probar esta rutina con una red no dirigida de 25 nodos simulada a partir de enlaces aleatorios independientes e idénticamente distribuidos con probabilidad de éxito 0.1. Graficar la red de prueba.**
+
+Primero necesitamos una función que genere la amtriz de adyacencia. La siguiente función precisamente hace eso:
+
+- Crea una matriz de ceros de tamaño $n \times n$ donde $n$ es el orden del grafo deseado.
+- Genera 1 y 0 para llenar la triangular superior de esa matriz (Generar los enlaces).
+- Si la red deseada es no dirigida se suma la matriz por su transpuesta.
+- Si la red deseada es dirigida se generan unos y ceros para la triangular inferior.
+
+```{r, class.source='fold-show'}
+ErgosRenyi = function(n = 25, symmetrical = TRUE, prob = 0.1){
+  A = matrix(0, ncol = n, nrow = n)
+  edges = rbinom(n = (n*(n-1))/2, size = 1, prob = prob)
+  A[upper.tri(A)] = edges
+  if (symmetrical){
+    A = A + t(A)
+  } else {
+    edges = rbinom(n = (n*(n-1))/2, size = 1, prob = prob)
+    A[lower.tri(A)] = edges
+  }
+  return(A)
+}
+
+set.seed(2012)
+A = ErgosRenyi()
+```
+
+La matriz de adyacencia generada por esta función para 25 nodos y una red no dirigida es:
+
+```{r, echo = FALSE}
+kable(A, caption = 'Adjacency matrix')
+```
+
+Una vez realizada la matriz de adyacencia utilizaremos la siguiente función para extraer la matriz de aristas y los vertices aislados:
+
+```{r, class.source = 'fold-show'}
+EdgeFromAdj = function(A){
+  edges = c()
+  vertices = c()
+  if (sum(A != t(A)) == 0){
+    A[upper.tri(A)] = 0
+  }
+  for (i in 1:nrow(A)){
+    conections = which(A[i,] != 0)
+    if (length(conections) > 0){
+      edges = rbind(edges, cbind(i,conections))
+    } else {
+      if (sum(A != t(A))) {vertices = cbind(vertices, i)}
+    }
+  }
+  vertices = vertices[!(vertices %in% edges[, "conections"])]
+  colnames(edges) = names(vertices) = NULL
+  return(list('edges' = edges, 'vertices' = vertices))
+}
+```
+
+Esta función esencialmente: 
+
+- Revisa si la matriz es simétrica.
+- Si la matriz es simétrica se elimina la triangular superior (Se reemplaza con cero)
+- Para cada fila `i` de la matriz `A` se revisa qué columna `j` contiene unos (Con la función `which`).
+- Si hay al menos un uno en esa fila, se añade a la lista de aristas (`edges`) todos los elementos de esa fila con unos (`i`, `j`).
+- Si no hay unos en esa fila el número de fila se añade a la lista de vertices aislados (`vertices`)
+
+Una vez declarada la función podemos utilizar a la matriz generada con `ErgosRenyi` (`A`) para generar nuestra matriz de aristas:
+
+
+```{r, class.source='fold-show'}
+edges = EdgeFromAdj(A)
+```
+
+```{r, echo = FALSE}
+cat('Los nodos del grafo que tienen al menos una conexión son:',
+    '\n\t\t', unique(c(edges$edges[,1], edges$edges[,2])),
+    '\n Y los nodos aislados son:', 
+    '\n\t\t', edges$vertices)
+```
+
+Finalmente, para revisar que efectivamente los dos grafos son iguales definimos grafos para cada uno y graficamos: 
+
+```{r, fig.width = 15, fig.align = 'center', fig.height=8, fig.cap = 'Graph from adjacency matrix vs graph from edge list matrix'}
+G = graph_from_edgelist(edges$edges, directed = F)
+# Comúnmente debería de ser encesario añadir los vértices aislados al grafo. Sin 
+# embargo, debido a que los nodos son números igraph completa los faltantes y ayuda a que
+# los layouts sean idénticos.
+
+G1 = graph_from_adjacency_matrix(A, mode = 'undirected')
+
+
+par(mfrow = c(1,2))
+set.seed(1305)
+plot.igraph(G1, edge.arrow.size = 0.1,
+            vertex.color = 'gray', 
+            vertex.size = 20,
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            vertex.label.cex = 1.5,
+            edge.width = 1.5)
+title(main = "Adjacency matrix", cex.main = 1.8, font = 2)
+set.seed(1305)
+plot.igraph(G, edge.arrow.size = 0.1,
+            vertex.color = 'gray', 
+            vertex.size = 20,
+            vertex.frame.color = NA, 
+            edge.color = 'black',
+            vertex.label.color = 'black', 
+            vertex.label.cex = 1.5,
+            edge.width = 1.5)
+title(main = "Edge list matrix", cex.main = 1.8, font = 2)
+```
+
+```{r}
+# a = as_adjacency_matrix(G, sparse = F)
+b = as_adjacency_matrix(G1, sparse = F)
+cat('Se encontraron exactamente',sum(A != b), 'diferencias entre los dos grafos.')
+```
