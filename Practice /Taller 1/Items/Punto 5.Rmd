@@ -98,16 +98,16 @@ A = A[as.character(seq(1:25)), as.character(seq(1:25))]
 G1 = graph_from_adjacency_matrix(A, mode = 'undirected')
 ```
 
-```{r, fig.align = 'center', fig.width=12, fig.height=8, fig.cap = 'Graph from adjacency matrix vs graph from edge list matrix'}
+```{r, fig.align = 'center', fig.width=12, fig.height=6, fig.cap = 'Graph from adjacency matrix vs graph from edge list matrix'}
 par(mfrow = c(1,2))
 set.seed(1305)
-plot.igraph(G, edge.arrow.size = 0.1,
+plot.igraph(G,
             vertex.color = 'gray', 
             vertex.size = 18,
             vertex.frame.color = NA, 
             edge.color = 'black',
             vertex.label.color = 'black', 
-            vertex.label.cex = 1.5,
+            vertex.label.cex = 1.1,
             edge.width = 1.5)
 title(main = "Adjacency matrix", cex.main = 1.6, font = 2)
 set.seed(1305)
@@ -117,7 +117,7 @@ plot.igraph(G1, edge.arrow.size = 0.1,
             vertex.frame.color = NA, 
             edge.color = 'black',
             vertex.label.color = 'black', 
-            vertex.label.cex = 1.5,
+            vertex.label.cex = 1.1,
             edge.width = 1.5)
 title(main = "Edge list matrix", cex.main = 1.6, font = 2)
 

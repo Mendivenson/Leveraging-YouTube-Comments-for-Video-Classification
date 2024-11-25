@@ -17,13 +17,14 @@ Y debería verse así:
 
 ```{r, fig.width=6, fig.height=6}
 set.seed(1305)
+l = layout_in_circle(g)
 par(mar = c(0,0,0,0))
-plot.igraph(g, edge.arrow.size = 0.4,
+plot.igraph(g, layout = l,
             vertex.color = 'gray', 
             vertex.frame.color = NA, 
             edge.color = 'black',
-            vertex.label.color = 'black', 
-            edge.width = 1.5)
+            vertex.label.color = 'black',
+            edge.width = 1, edges.curved = 0)
 mtext('A complete graph with 7 nodes.', side = 1, line = -1.2, 
       col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, cex = 1.1, adj = 0.99, outer = T)
 ```
@@ -111,13 +112,21 @@ g = make_tree(n = 7, children = 2, mode = 'in')
 ```{r, fig.width=6, fig.height=6}
 set.seed(1305)
 par(mar = c(0,0,0,0))
+
+
+g = make_tree(n = 7, children = 2, mode = 'out')
+
+# Definir un layout con `layout.reingold.tilford` y especificar la raíz
+layout <- layout_as_tree(g,  flip.y = F)  # Nodo raíz definido
+
+
 plot.igraph(g, edge.arrow.size = 0.4,
-            layout = layout_as_tree(g),
+            layout = layout,
             vertex.color = 'gray', 
             vertex.frame.color = NA, 
             edge.color = 'black',
             vertex.label.color = 'black', 
-            edge.width = 1.5)
+            edge.width = 1.5, edge.arrow.mode = T)
 mtext('A DAG with 7 nodes.', side = 1, line = -1.2, 
       col = adjustcolor('dodgerblue4', alpha = 0.45), font = 2, cex = 1.1, adj = 0.99, outer = T)
 ```

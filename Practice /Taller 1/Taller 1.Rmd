@@ -108,3 +108,12 @@ library(kableExtra)
 
 ```{r child = 'Items/Punto 12.Rmd'}
 ```
+
+
+<br>
+<div style="height: 18px; background-color: lightgray; margin: 20px 0;"></div>
+<br>
+
+---
+
+> ***El código fuente para cada uno de los puntos está subido en github [aquí](https://github.com/Mendivenson/Leveraging-YouTube-Comments-for-Video-Classification/tree/main/Practice%20/Taller%201). Para generar el archivo html debe renderizarse el archivo `Taller 1.Rmd` con el botón `knit` o presionando `Ctrl + k`. Para correr cada punto por separado deben primero en cargarse las librerías que se cargan en el archivo `Taller 1.Rmd`.***

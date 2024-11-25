@@ -78,7 +78,7 @@ cat('Los nodos del grafo que tienen al menos una conexión son:',
 
 Finalmente, para revisar que efectivamente los dos grafos son iguales definimos grafos para cada uno y graficamos: 
 
-```{r, fig.width = 15, fig.align = 'center', fig.height=8, fig.cap = 'Graph from adjacency matrix vs graph from edge list matrix'}
+```{r, fig.width = 12, fig.align = 'center', fig.height=6, fig.cap = 'Graph from adjacency matrix vs graph from edge list matrix'}
 G = graph_from_edgelist(edges$edges, directed = F)
 # Comúnmente debería de ser encesario añadir los vértices aislados al grafo. Sin 
 # embargo, debido a que los nodos son números igraph completa los faltantes y ayuda a que
@@ -89,25 +89,29 @@ G1 = graph_from_adjacency_matrix(A, mode = 'undirected')
 
 par(mfrow = c(1,2))
 set.seed(1305)
-plot.igraph(G1, edge.arrow.size = 0.1,
+plot.igraph(G1,
             vertex.color = 'gray', 
-            vertex.size = 20,
+            vertex.size = 18,
             vertex.frame.color = NA, 
             edge.color = 'black',
             vertex.label.color = 'black', 
-            vertex.label.cex = 1.5,
+            vertex.label.cex = 1.1,
             edge.width = 1.5)
-title(main = "Adjacency matrix", cex.main = 1.8, font = 2)
+title(main = "Adjacency matrix", cex.main = 1.6, font = 2)
 set.seed(1305)
 plot.igraph(G, edge.arrow.size = 0.1,
             vertex.color = 'gray', 
-            vertex.size = 20,
+            vertex.size = 18,
             vertex.frame.color = NA, 
             edge.color = 'black',
             vertex.label.color = 'black', 
-            vertex.label.cex = 1.5,
+            vertex.label.cex = 1.1,
             edge.width = 1.5)
-title(main = "Edge list matrix", cex.main = 1.8, font = 2)
+title(main = "Edge list matrix", cex.main = 1.6, font = 2)
+
+a = as_adjacency_matrix(G, sparse = F)
+b = as_adjacency_matrix(G1, sparse = F)
+cat('Se encontraron exactamente',sum(a != b), 'diferencias entre los dos grafos.')
 ```
 
 ```{r}

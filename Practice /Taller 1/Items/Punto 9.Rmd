@@ -58,10 +58,10 @@ set.seed(1305)
 # layout <- layout_with_kk(G)
 layout = layout_with_fr(G)
 par(mar = c(0,1,0,0))
-plot.igraph(Punto9$graph, edge.arrow.size = 0.1, layout = layout,
+plot.igraph(Punto9$graph, edge.arrow.size = 0.35, layout = layout,
             vertex.color = adjustcolor('darkslategray4', 0.4), 
             vertex.frame.color = 'darkslategray4', 
-            edge.color = adjustcolor('gray', alpha = 0.8),
+            edge.color = adjustcolor('darkgray', alpha = 0.95),
             vertex.label = NA, 
             vertex.size = 2.9,
             edge.width = 1.8,

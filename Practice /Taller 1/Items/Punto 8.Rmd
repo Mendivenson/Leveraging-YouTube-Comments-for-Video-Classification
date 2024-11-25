@@ -75,8 +75,8 @@ layout <- layout_with_kk(G)
 # afuera del área gráfica por lo que se reubican dentro de un área no tan "poblada" de la
 # representación del grafo.
 
-layout[degree(G) == 0, ] <- cbind(runif(sum(degree(G) == 0), -8, -4),
-                                  runif(sum(degree(G) == 0), 6, 8))
+layout[degree(G) == 0, ] <- cbind(runif(sum(degree(G) == 0), -6, 0),
+                                  runif(sum(degree(G) == 0), 5, 10))
 # lay = layout_nicely(G)
 # lay = layout_with_kk(G)
 # lay = layout_with_graphopt(G, charge = 0.0001, mass = 180)
