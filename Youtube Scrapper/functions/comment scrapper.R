@@ -1,18 +1,19 @@
 # ======================== FUNCTION DESCRIPTION ===========================
-# This function fetches the top comments from a video in YouTube. It works more like a 
-# wrapper for a function in httr that fetch the comments and returns a dataframe instead
-# of the JSON response of the html request.
-
-# It is mean to take into consideration the fact: API just returns the first 100
-# comments of any given video except if the video has restrictions in which case 
-# the API request is returned with an error but for this specific function the
-# videos are first verified in the function get_top_videos.
-
-# Creation date: 28/11/2024
-
+# This function retrieves the top comments from a YouTube video. It serves as a 
+# wrapper for an httr function that fetches comments and returns a dataframe 
+# instead of the JSON response from the HTTP request.
+#
+# It considers the following limitation: The API only returns the first 100 
+# comments for any given video. Additionally, if the video has restrictions, 
+# the API request will return an error. However, for this specific function, 
+# videos are pre-verified using the function get_top_videos.
+#
+# Creation Date: 28/11/2024
+#
 # Author: Michel Mendivenson Barragán Zabala
-#         Universidad Nacional de Colombia, Statistics Department.
+#         Universidad Nacional de Colombia, Statistics Department
 #         Social Network Analysis
+
 
 library(httr)
 library(jsonlite)
