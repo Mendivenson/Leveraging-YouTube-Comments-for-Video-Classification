@@ -1,4 +1,4 @@
-# The data was retrieved on 26/Nov/2024 by running this code specifically. 
+# The data was retrieved on 27/Nov/2024 by running this code specifically. 
 # Visit https://developers.google.com/youtube/v3 for the YouTube API documentation.
 
 # All the functions used here are available under the functions folder.
@@ -20,7 +20,7 @@ source(file = 'functions/video scrapper.R')
 # ============== FETCHING THE MOST POPULAR VIDEOS OF EACH CATEGORY ==================
 
 # =====> Load the API key
-key = readLines('keys/key2')                       # There is more than one key in the file
+key = readLines('keys/key1')[1]                    # There is more than one key in the file
 
 # =====> Is needed to first fetch video categories
 categories <- GET(url = "https://www.googleapis.com/youtube/v3/videoCategories",
@@ -42,7 +42,7 @@ for (i in 1:nrow(categories)) {
     
     # Actually scraping the data
     video_data = get_top_videos(key = key,
-                                howMany = 25, 
+                                howMany = 30, 
                                 shorts = F, 
                                 categoryID = categories$ID[i])
     
@@ -67,18 +67,20 @@ for (i in names(videos)) {
 }
 
 
-# Category: Film & Animation       | n: 2   
-# Category: Autos & Vehicles       | n: 21  
-# Category: Music                  | n: 25  
+# Category: Film & Animation       | n: 1   
+# Category: Autos & Vehicles       | n: 20  
+# Category: Music                  | n: 27  
 # Category: Pets & Animals         | n: 3   
-# Category: Sports                 | n: 10  
-# Category: Gaming                 | n: 25  
-# Category: People & Blogs         | n: 25  
-# Category: Comedy                 | n: 4   
+# Category: Sports                 | n: 9   
+# Category: Gaming                 | n: 30  
+# Category: People & Blogs         | n: 30  
+# Category: Comedy                 | n: 3   
 # Category: Entertainment          | n: 1   
-# Category: News & Politics        | n: 25  
-# Category: Howto & Style          | n: 3   
-# Category: Science & Technology   | n: 25  
-# Category: Nonprofits & Activism  | n: 4 
+# Category: News & Politics        | n: 30  
+# Category: Howto & Style          | n: 2   
+# Category: Science & Technology   | n: 30  
+# Category: Nonprofits & Activism  | n: 6
 
 save(categories, videos, file = 'data retrieved/videos.RData')
+
+
