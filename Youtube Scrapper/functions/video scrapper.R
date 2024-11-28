@@ -37,20 +37,13 @@ library(jsonlite)  # To handle JSON responses
 library(dplyr)     # For data manipulation
 
 # ========================== FETCH TOP VIDEOS =============================
-get_top_videos = function(key,
-                          # YouTube API key
-                          howMany = 20,
-                          # Number of videos to fetch
-                          shorts = F,
-                          # Filter short videos? (TRUE = include, FALSE = exclude)
-                          categoryID = NULL,
-                          # Category ID (NULL fetches all categories)
-                          chart = 'mostPopular',
-                          # Sorting criteria ('mostPopular' or 'chartUnspecified')
-                          regionCode = 'US',
-                          # Restrict search to specific region (ISO 3166-1 alpha-2)
-                          verbose = F,
-                          # Debug: Show API URLs instead of a progress bar?
+get_top_videos = function(key,                           # YouTube API key
+                          howMany = 20,                  # Number of videos to fetch
+                          shorts = F,                    # Filter short videos? (TRUE = include, FALSE = exclude)
+                          categoryID = NULL,             # Category ID (NULL fetches all categories)
+                          chart = 'mostPopular',         # Sorting criteria ('mostPopular' or 'chartUnspecified')
+                          regionCode = 'US',             # Restrict search to specific region (ISO 3166-1 alpha-2)
+                          verbose = F,                   # Debug: Show API URLs instead of a progress bar?
                           encoding = 'UTF-8') {
   # Initialize variables
   response = list()                      # Stores the query result
@@ -76,88 +69,48 @@ get_top_videos = function(key,
     # API request
     response = GET(
       url = "https://www.googleapis.com/youtube/v3/videos",
-      query = list(
-        part = 'snippet, contentDetails, statistics, status',
-        type = 'video',
-        videoCategoryId = categoryID,
-        key = key,
-        regionCode = regionCode,
-        chart = chart,
-        maxResults = 50,
-        pageToken = response$nextPageToken
-      )
-    )
+      query = list(part = 'snippet, contentDetails, statistics, status', type = 'video',
+                   videoCategoryId = categoryID, key = key, regionCode = regionCode, 
+                   chart = chart, maxResults = 50, pageToken = response$nextPageToken))
     url = response$url
-    if (verbose) {
-      cat('\n', url, '\n')
-    }  # Debug: Print API URL
+    if (verbose) {cat('\n', url, '\n')}  # Debug: Print API URL
     
     # Parse response
     response = fromJSON(content(response, type = 'text', encoding = encoding),
                         flatten = T)
     
     if (is.null(response$error)) {
-      # Append video details to the data frame
       video_data = rbind(
         video_data,
-        response$items %>% select(
-          'ID' = id,
-          # Video ID
-          'published' = snippet.publishedAt,
-          # Publication date
-          'channel ID' = snippet.channelId,
-          # Channel ID
-          'channel name' = snippet.channelTitle,
-          # Channel name
-          'title' = snippet.title,
-          # Video title
-          'description' = snippet.description,
-          # Video description
-          'category ID' = snippet.categoryId,
-          # Category ID
-          'Language' = snippet.defaultAudioLanguage,
-          # Default audio language
-          'Duration' = contentDetails.duration,
-          # Video duration
-          'Views' = statistics.viewCount,
-          # View count
-          'likeCount' = statistics.likeCount,
-          # Like count
-          'commentCount' = statistics.commentCount
-        ) %>%             # Comment count
+        response$items %>% select('ID' = id, 'published' = snippet.publishedAt, 'channelID' = snippet.channelId,
+                                  'channelname' = snippet.channelTitle,'title' = snippet.title, 'description' = snippet.description,
+                                  'categoryID' = snippet.categoryId,'language' = snippet.defaultAudioLanguage,
+                                  'duration' = contentDetails.duration,'viewsCount' = statistics.viewCount,
+                                  'likeCount' = statistics.likeCount,'commentCount' = statistics.commentCount
+        ) %>%             
           # Filter short videos if `shorts` is FALSE
-          {
-            if (!shorts)
-              filter(.,
-                     lubridate::duration(Duration) > lubridate::dseconds(90))
-            else
-              .
-          } |>
+          {if (!shorts)
+            filter(., lubridate::duration(duration) > lubridate::dseconds(90))
+           else
+              .} |>
           filter(commentCount > 0) %>%
-          {
-            if (nrow(.) > 0) {
-              filter(., unlist(lapply(
-                .$ID,
-                FUN = function(x)
-                  is.null(fromJSON(
-                    content(
-                      GET(
-                        url =  "https://www.googleapis.com/youtube/v3/commentThreads",
-                        query = list(
-                          part = 'snippet',
-                          videoId = x,
-                          key = key,
-                          maxResults = 1
-                        )
-                      ),
-                      type = 'text',
-                      encoding = 'UTF8'
-                    ),
-                    flatten = T
-                  )$error)
-              )))
-            }
-          }
+          {if (nrow(.) > 0) {
+            filter(., unlist(lapply(.$ID,
+                                    FUN = function(x)
+                                      is.null(fromJSON(content(GET(
+                                        url =  "https://www.googleapis.com/youtube/v3/commentThreads",
+                                        query = list(
+                                          part = 'snippet',
+                                          videoId = x,
+                                          key = key,
+                                          maxResults = 1
+                                        )
+                                      ),
+                                      type = 'text',
+                                      encoding = 'UTF8'
+                                      ),
+                                      flatten = T
+                                      )$error))))}}
       )
       
       # Update progress bar
@@ -197,7 +150,7 @@ get_top_videos = function(key,
   if (!verbose) {
     close(pb)
   }  # Close progress bar
-  if (is.null(response$error)) {
+  if (is.null(response$error) & nrow(video_data) > 0) {
     return(video_data)
   } else {
     return(response)
