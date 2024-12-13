@@ -28,7 +28,7 @@
 
 # Author: Michel Mendivenson Barragán Zabala
 #         Universidad Nacional de Colombia, Statistics Department
-#         Social Network Analysis
+#         Statistical Social Network Analysis
 # ========================================================================
 
 # ============================= DEPENDENCIES ==============================

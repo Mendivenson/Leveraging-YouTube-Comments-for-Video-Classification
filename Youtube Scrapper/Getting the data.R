@@ -1,4 +1,4 @@
-# The data was retrieved on 28/Nov/2024 by running this code specifically. 
+# The data was retrieved on 12/Dec/2024 by running this code specifically. 
 # Visit https://developers.google.com/youtube/v3 for the YouTube API documentation.
 
 # All the functions used here are available under the functions folder.
@@ -14,13 +14,15 @@ library(httr)
 library(jsonlite)
 library(dplyr)
 
-
-source(file = 'functions/video scrapper.R')
-
-# ============== FETCHING THE MOST POPULAR VIDEOS OF EACH CATEGORY ==================
+# ==============================================================================
+# ============== FETCHING THE MOST POPULAR VIDEOS OF EACH CATEGORY =============
+# ==============================================================================
 
 # =====> Load the API key
 key = readLines('keys/key1')[1]                    # There is more than one key in the file
+
+# =====> Load the scrapping function
+source(file = 'functions/video scrapper.R')
 
 # =====> Is needed to first fetch video categories
 categories <- GET(url = "https://www.googleapis.com/youtube/v3/videoCategories",
@@ -33,7 +35,7 @@ categories = as.data.frame(cbind('ID' = categories$items$id,
 # "Assignable" (TRUE) categories are "real" categories that can be assigned or viewed 
 # through the video's metadata.
 
-# =====> Fetchiing the actual videos
+# =====> Fetching the actual videos
 videos = list()                                   # All the objects will be stored in a list
 for (i in 1:nrow(categories)) {
   if (categories$Assignable[[i]]) {
@@ -61,33 +63,40 @@ for (i in 1:nrow(categories)) {
 
 # After the use of the function each category counts with: 
 for (i in names(videos)) {
-  # Formateamos las cadenas para que el texto esté alineado
   cat(sprintf('Category: %-22s | Videos: %-4d\n', i, nrow(videos[[i]])))
 }
 
 
-# Category: Film & Animation       | Videos: 1   
-# Category: Autos & Vehicles       | Videos: 23  
+# Category: Film & Animation       | Videos: 6   
+# Category: Autos & Vehicles       | Videos: 16  
 # Category: Music                  | Videos: 28  
-# Category: Pets & Animals         | Videos: 3   
-# Category: Sports                 | Videos: 10  
+# Category: Pets & Animals         | Videos: 6   
+# Category: Sports                 | Videos: 13  
 # Category: Gaming                 | Videos: 30  
 # Category: People & Blogs         | Videos: 30  
-# Category: Comedy                 | Videos: 3   
-# Category: Entertainment          | Videos: 1   
+# Category: Comedy                 | Videos: 5   
+# Category: Entertainment          | Videos: 3   
 # Category: News & Politics        | Videos: 30  
+# Category: Howto & Style          | Videos: 6   
 # Category: Science & Technology   | Videos: 30  
-# Category: Nonprofits & Activism  | Videos: 6   
+# Category: Nonprofits & Activism  | Videos: 1   
 
 save(categories, videos, file = 'data retrieved/videos.RData')
 
-
-# ======== FETCHING THE TOP 100 MOST RELEVANT COMMENTS FOR EACH VIDEO ===========
+# ==============================================================================
+# ======== FETCHING THE TOP 100 MOST RELEVANT COMMENTS FOR EACH VIDEO ==========
+# ==============================================================================
 
 # Load the necessary data and functions
-load('data retrieved/videos.RData')               # Load pre-saved video data
-source('functions/comment_scrapper.R')            # Load the function for fetching comments
-key = readLines('keys/key2')[1]                   # Load the API key
+# dir = '~/UN/1) Análisis de redes sociales (ARS)/2) Workplace/Youtube Scrapper/'
+# setwd(dir)
+# load('data retrieved/videos.RData')             # Load pre-saved video data
+
+# =====> Load the scrapping function
+source('functions/comment scrapper.R')            # Load the function for fetching comments
+
+# =====> Load the API key
+key = readLines('keys/key2')[1]                   
 
 # =====> Fetching the actual comments
 comments = list()
@@ -121,27 +130,92 @@ for (i in names(videos)) {
 
 # Summary: After running the function, the number of comments collected per category is:
 for (i in names(comments)) {
-  # Format output for aligned text display
   cat(sprintf('Category: %-22s | Comments: %-4d\n', i, nrow(comments[[i]])))
 }
 
-# Example output:
-# Category: Film & Animation       | Comments: 100 
-# Category: Autos & Vehicles       | Comments: 2300
+# Category: Film & Animation       | Comments: 600 
+# Category: Autos & Vehicles       | Comments: 1600
 # Category: Music                  | Comments: 2800
-# Category: Pets & Animals         | Comments: 299 
-# Category: Sports                 | Comments: 1000
-# Category: Gaming                 | Comments: 2861
-# Category: People & Blogs         | Comments: 3000
-# Category: Comedy                 | Comments: 300 
-# Category: Entertainment          | Comments: 100 
+# Category: Pets & Animals         | Comments: 600 
+# Category: Sports                 | Comments: 1300
+# Category: Gaming                 | Comments: 2666
+# Category: People & Blogs         | Comments: 2926
+# Category: Comedy                 | Comments: 500 
+# Category: Entertainment          | Comments: 300 
 # Category: News & Politics        | Comments: 3000
-# Category: Science & Technology   | Comments: 2856
-# Category: Nonprofits & Activism  | Comments: 600 
+# Category: Howto & Style          | Comments: 600 
+# Category: Science & Technology   | Comments: 2852
+# Category: Nonprofits & Activism  | Comments: 100 
 
 # Note: Each video can be analyzed as a separate network within its respective category.
 
-save(comments, file = 'data retrieved/comments.data')
+save(comments, file = 'data retrieved/comments.Rdata')
 
 
-# ====== FETCHING THE THREAD OF THE MOST RELEVANT COMMENT FOR EACH VIDEO =======
+# === FETCHING THE THREAD OF THE MOST RELEVANT COMMENT THREAD FOR EACH VIDEO ===
+
+# Load the necessary data and functions
+# load(file = 'data retrieved/comments.Rdata')
+
+# =====> Load the scrapping function
+source(file = 'functions/comment Threads.R')
+
+# =====> Load the API key
+key = readLines('keys/key3')[1]                  
+
+threads = list()
+for (i in names(comments)){
+  cat('\n\n\n Processing information for the category: ', i, '\n\n\n')
+  tops = comments[[i]] |> 
+    filter(order == 1) |> 
+    select('videoID' = videoID, 
+           'threadID' = commentID, 
+           'commentID' = commentID, 
+           'author' = author, 
+           'authorID' = authorID,
+           'comment' = comment, 
+           'likesCount' = likesCount,
+           'published' = published,
+           'order' = order)
+  pb = txtProgressBar(min = 0, max = nrow(tops), style = 3)  # Create a progress bar
+  threads[[i]] = as.data.frame(c())
+  for (j in 1:nrow(tops)){
+    idParent = tops[j,"threadID"]
+    idVideo = tops[j, "videoID"]
+    thread = get_thread(key = key, commentID = idParent, maxReplies = 100, verbose = TRUE)
+    if (length(thread) > 0){
+      thread = cbind('videoID' = idVideo, thread)
+      thread$order = thread$order + 1
+      thread = rbind(tops[j,], thread)
+      threads[[i]] = rbind(threads[[i]], thread)
+    } else {
+      threads[[i]] = rbind(threads[[i]], tops[j,])
+    }
+    setTxtProgressBar(pb, j)
+  }
+  setTxtProgressBar(pb, nrow(tops))
+  close(pb)
+}
+
+
+# Summary: After running the function, the number of comments collected per category is:
+for (i in names(threads)) {
+  cat(sprintf('Category: %-22s | Comments: %-4d\n', i, nrow(threads[[i]])))
+}
+
+# Category: Film & Animation       | Comments: 369 
+# Category: Autos & Vehicles       | Comments: 585 
+# Category: Music                  | Comments: 1376
+# Category: Pets & Animals         | Comments: 294 
+# Category: Sports                 | Comments: 483 
+# Category: Gaming                 | Comments: 948 
+# Category: People & Blogs         | Comments: 424 
+# Category: Comedy                 | Comments: 367 
+# Category: Entertainment          | Comments: 259 
+# Category: News & Politics        | Comments: 2069
+# Category: Howto & Style          | Comments: 286 
+# Category: Science & Technology   | Comments: 1247
+# Category: Nonprofits & Activism  | Comments: 101 
+
+
+save(threads, file = 'data retrieved/threads.RData')

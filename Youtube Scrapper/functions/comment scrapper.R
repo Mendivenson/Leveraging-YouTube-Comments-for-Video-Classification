@@ -12,12 +12,14 @@
 #
 # Author: Michel Mendivenson Barragán Zabala
 #         Universidad Nacional de Colombia, Statistics Department
-#         Social Network Analysis
+#         Statistical Social Network Analysis
 
+# ============================= DEPENDENCIES ===================================
+library(httr)      # For HTTP requests
+library(jsonlite)  # To handle JSON responses
+library(dplyr)     # For data manipulation
 
-library(httr)
-library(jsonlite)
-library(dplyr)
+# ======================= FETCH TOP COMMENTS PER VIDEO =========================
 
 get_top_comments = function(key, videoID, maxComments = 100, order = 'relevance',
                             verbose = F,encoding = 'UTF8') {

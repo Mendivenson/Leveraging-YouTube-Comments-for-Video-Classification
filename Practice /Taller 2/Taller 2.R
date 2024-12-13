@@ -10,9 +10,11 @@ library(dplyr)
 
 # =========================== PUNTO 3 Y 4 ======================================
 # Los puntos no necesitan de código, pero para que los gráficos no se vieran 
-# distorsionados ni borrosos se generaron nuevos gráficos:
+# distorsionados ni borrosos se generaron nuevos gráficos
+# ==============================================================================
 
-## Grafo circular:
+# == Grafo circular:
+
 par(mar = c(0,0,0,0))
 g =  make_ring(n = 6, directed = F)
 set.seed(1)
@@ -25,13 +27,15 @@ plot.igraph(g,
             edge.width = 6,
             vertex.size = 38)
 
-## Grafo de estrella:
+# == Grafo de estrella:
+
 g = make_star(n = 6, mode = 'undirected')
 set.seed(1)
 plot.igraph(g, vertex.color = 'gray',  vertex.frame.color = NA, vertex.label.color = 'black', 
             vertex.label.cex = 3.5, vertex.size = 38, edge.color = 'black', edge.width = 6)
 
-## Grafo punto 4:
+# == Grafo punto 4:
+
 g = make_empty_graph(n = 6, directed = F)
 g = add_edges(g, edges = c(1,2,2,5,5,1,1,4,4,3,3,6,6,1))
 set.seed(2)
@@ -40,11 +44,19 @@ plot.igraph(g, vertex.color = 'gray', vertex.frame.color = NA, vertex.label.colo
 
 
 # ============================= PUNTO 5 ========================================
+# Considerando el conjunto de datos comtrade.RData asociado con el crecimiento anual
+# del comercio (Diferencia en doláres en escala logarítmica respecto al año 2000). Este 
+# conjunto de datos involucra 30 países, 10 años desde 1996 hasta 2005, y 6 clases de 
+# productos diferentes, como se muestra a continuación.
+# ==============================================================================
 
-# Lectura de los datos:
+# =====> LECTURA DE DATOS
+
 load('data/comtrade.RData')
+
+# =====> UNA SERIE DE TIEMPO PARA LA MEDIA GLOBAL POR CATEGORÍA (NO ES LO QUE SE PIDE EN EL PUNTO):
+
 par(mar = c(5,4,4,2))
-## Una serie de tiempo para la media global por categoría:
 años = as.character(1996:2005)
 manufact = list()                   # Asociado al índice 5 de la tercera dimensión
 miscellaneous = list()              # Asociado al índice 6 de la tercera dimensión
@@ -68,19 +80,22 @@ legend( "topleft", legend = dimnames(comtrade)[[3]][5:6], col = c("aquamarine4",
   pch = c(16, 17), lty = 1, bty = 'n')
 
 
-# ======> Lo que realmente se solicita en el punto: 
+# ======> LO SOLICITADO EN EL PUNTO:
 
-Y = apply ( X = comtrade [ , , c (5 ,6) ,] , MARGIN = c (1 ,2) , FUN = mean )
+Y = apply(X = comtrade [ , , c (5 ,6) ,] , MARGIN = c (1 ,2) , FUN = mean)   # Matriz de adyacencia Y
 
-# == (A) Calcule la media global de Y.
+
+# ======> (A) CALCULE LA MEDIA GLOBAL DE Y.
+
 n = nrow(Y)
 media = (1/(n * (n-1)) * sum(Y, na.rm = T))
 
-# == (B) Calcule la media global por fila (Grafique). 
+# ======> (B) CALCULE LA MEDIA GLOBAL POR FILA (GRAFIQUE).
+ 
 mFila = apply(MARGIN=1, X = Y, FUN = function(x) sum(x, na.rm = T)/29)
 
-## El gráfico del histograma
- 
+# == Se grafica con un histograma.
+
 hist(mFila, probability = T,
      col = 'coral1',
      border = 'coral1', 
@@ -91,10 +106,11 @@ mtext('Respecto a la media global de las categorías Miscellaneous \n manufactur
 mFilaD = density(mFila)
 lines(mFilaD, col = 'aquamarine4')
 
-## == (C) Calcule la media global por columna (Grafique).
+# ======> (C) CALCULE LA MEDIA GLOBAL POR COLUMNA (GRAFIQUE).
+
 mCol = apply(MARGIN=2, X = Y, FUN = function(x) sum(x, na.rm = T)/29)
 
-## El gráfico del histograma
+# == Se grafica en un histograma.
 
 hist(mCol, probability = T,
      col = 'coral1',
@@ -106,22 +122,24 @@ mtext('Respecto a la media global de las categorías Miscellaneous \n manufactur
 mColD = density(mFila)
 lines(mColD, col = 'aquamarine4')
 
-# == (D) Calcular la media de las medias por columna y por fila
+# ======> (D) CALCULAR LA MEDIA DE LAS MEDIA POR COLUMNA Y POR FILA.
 
 mediaFila = mean(mFila)
 mediaCol = mean(mCol)
 
-# == (E) Calcular la sd de las medias por columna y por fila
+# ======> (E) CALCULAR LA DESVIACIÓN ESTÁNDAR POR COLUMNA Y POR FILA.
 
 sdFila = sd(mFila)
 sdCol = sd(mCol)
 
-# == (E) Calcular el coeficiente de correlación de las medias por columna y por fila
+# ======> (F) CALCULAR EL COEFICIENTE DE CORRLEACIÓN DE LAS MEDIAS POR COLUMNA Y POR FILA.
+#             REALICE UN DISPERSOGRAMA
 
 corrMedia = cov(mFila, mCol)/(sdFila * sdCol)
 
 
-## Presentación de resultados
+# == PRESENTACIÓN DE RESULTADOS
+
 results = rbind(c(mediaFila, mediaCol),
                 c(sdFila,sdCol),
                 c(corrMedia, NA))
@@ -129,7 +147,8 @@ colnames(results) = c('Sociabilidad', 'Popularidad')
 rownames(results) = c('Media', 'Desviación estándar', 'Correlación')
 
 # xtable::xtable(x = results, digits = 4)
-## Dispersograma 
+
+## == Dispersograma
 
 A = cbind('Sociabilidad' = mFila, 'Popularidad' = mCol)
 plot(A, col = 'coral3', pch = 20,
@@ -138,6 +157,8 @@ lines(x = c(1,-1), y = c(1,-1), col = 'aquamarine4', lty = 'dotdash')
 mtext(bquote(bold('La línea punteada representa y = x')),
       col = adjustcolor(col = 'darkgray', alpha = 1),
       side = 1, cex = 0.83, line = -1.1, adj = 0.98)
+
+# == Identificando los puntos más sociables y más populares.
 
 A = as.data.frame(A) |> 
   arrange(-Sociabilidad)
@@ -154,12 +175,26 @@ text(x = A$Sociabilidad[2],  y = A$Popularidad[2] - 0.015, labels = rownames(A[2
      pos = 3,  cex = 0.8, col = "darkred")
 
 # ============================= PUNTO 6 ========================================
+# Considere el conjunto de datos dado en conflict.RData recopilado por Mike Ward 
+# y Xun Cao del departamento de Ciencias Políticas de la Universidad de Washington, 
+# asociado con datos de conflictos entre países en los años 90. El archivo 
+# conflict.RData contiene una lista con tres arreglos, X, Y, y D. X tiene tres 
+# campos: population (población en millones), gdp (PIB en millones de dolares),
+# polity (puntuación política, un índice de democracia). Y hace referencia a una 
+# matriz Y = [yi,j ] en la que yi,j representa el número de conflictos iniciados 
+# por el país i hacia el país j. Finalmente, D es un arreglo de tres dimensiones
+# dimensionescuya tercera dimensión contiene indices entre cada par de países
+# asociados con: comercio (dimensión 1), importaciones (dimensión 2), organizaciones
+# intergubernamentales (dimensión 3), y distancia geográfica (dimensión 4).
+# ==============================================================================
+
+# ======> CARGANDO LOS DATOS
 
 load('data/conflict.RData')
 
-## == (A) Hacer una visualización decorada de la red de conflictos
+## ======> (A) HACER UNA VISUALIZACIÓN DECORADA DE LA RED DE CONFLICTOS
 
-# Grafo inicial
+# == Grafo inicial
 
 g = graph_from_adjacency_matrix(dat$Y)
 set.seed(1305)
@@ -178,46 +213,41 @@ mtext(text = 'Una arista se corresponde a \n el país x inició una guerra con e
       family = 'courier', cex = 1.1, font = 2, col = 'black', side = 1, padj = 1, adj = 0.5)
 
 
-# Inclusión de algunos atributos a los vértices para decoración: 
-V(g)$gdp = dat$X[, "gdp"]                                    # PIB de cada país
-V(g)$population = dat$X[, "population"]
-V(g)$polity = dat$X[, "polity"]
-V(g)$degree = degree(g)                                      # Grado total
-V(g)$degreein = degree(g, mode = 'in')                       # Grado de entrada
-V(g)$degreeout = degree(g, mode = 'out')                     # Grado de salida
-# g = subgraph(g, V(g)[V(g)$degree != 0])                    # Eliminar los vértices desconectados
+# == INCLUSIÓN DE ATRIBUTOS NODALES:
 
-V(g)$labels = names(V(g))
-
-# Asignar Top5Degree
+V(g)$gdp = dat$X[, "gdp"]                                               # PIB de cada país
+V(g)$population = dat$X[, "population"]                                 # Población de cada país
+V(g)$polity = dat$X[, "polity"]                                         # Puntuación política de cada país
+V(g)$degree = degree(g)                                                 # Grado total
+V(g)$degreein = degree(g, mode = 'in')                                  # Grado de entrada
+V(g)$degreeout = degree(g, mode = 'out')                                # Grado de salida
+# g = subgraph(g, V(g)[V(g)$degree != 0])                               # Eliminar los vértices desconectados
+V(g)$labels = names(V(g))                                               # Nombres de los países
+# Nombres top 5 por grado 
 V(g)$Top5Degree = ifelse(V(g)$labels %in% names(sort(-degree(g)))[1:5], 
                          V(g)$labels, 
                          NA)
-
-# Asignar Top5DegreeIn
+# Nombres top 5 grado de entrada
 V(g)$Top5DegreeIn = ifelse(V(g)$labels %in% names(sort(-degree(g, mode = 'in')))[1:5], 
                            V(g)$labels, 
                            NA)
-
-# Asignar Top5DegreeOut
+# Nombres top 5 grado de salida
 V(g)$Top5DegreeOut = ifelse(V(g)$labels %in% names(sort(-degree(g, mode = 'out')))[1:5], 
                             V(g)$labels, 
                             NA)
-
-# Asignar Top5PIB
+# Nombres top 5 PIB
 V(g)$Top5PIB = ifelse(V(g)$labels %in% names(sort(-dat$X[,"gdp"]))[1:5], 
                       V(g)$labels, 
                       NA)
-
-# Asignar Top5Population
+# Nombres top 5 población
 V(g)$Top5Population = ifelse(V(g)$labels %in% names(sort(-dat$X[,"population"]))[1:5], 
                              V(g)$labels, 
                              NA)
-
-# Asignar Top5Polity
+# Nombres top 5 mejores puntajes de democracia
 V(g)$Top5Polity = ifelse(V(g)$labels %in% names(sort(-dat$X[,"polity"]))[1:5], 
                          V(g)$labels, 
                          NA)
+# Nombres top 5 peores puntaje de democracia
 V(g)$Top5Polity = ifelse(V(g)$labels %in% names(sort(dat$X[,"polity"]))[1:5], 
                          V(g)$labels, 
                          V(g)$Top5Polity)
@@ -266,7 +296,7 @@ par(mar = c(3,0,3,0), mfrow = c(1,3))
 # set.seed(1305)
 # layout = layout_with_fr(g)
 
-# Grafo con la variable de PIB (Todos los PIB son positivos)
+# Utilizando el PIB
 
 labels = V(g)$labels
 labels[V(g)$degree != 0] = NA
@@ -333,17 +363,22 @@ mtext(text = texto, padj = 0.8,
       family = 'courier', cex = 0.8, font = 2, col = 'black', side = 1)
 
 
-# == (B) Calcule la media global: 
+# ======> (B) CALCULE LA MEDIA GLOBAL: 
 n = nrow(dat$Y)
 mediaConflict = sum(dat$Y)/(n * (n - 1)) # La diagonal de la matriz Y son sólo ceros
 cat('La media global de la matriz de adyacencia relacionada a los conflictos es:', mediaConflict)
 
-# == (C) Calcule el histograma de lso grados de salida y de entrada, la media y la desviación estándar
+# ======> (C) GRAFIQUE LA DISTRIBUCIÓN DE LOS GRADOS DE SALIDA Y DE ENTRADA, LA MEDIA Y LA DESVIACIÓN ESTÁNDAR
 
 mediaIn = mean(V(g)$degreein)
 mediaOut = mean(V(g)$degreeout)
 sdIn = sd(V(g)$degreein)
 sdOut = sd(V(g)$degreeout)
+
+# == Si bien la función de igraph (degree) no calcula como tal la suma de la fuerza,
+#    sino que en cambio calcula la suma de las salidas que existen desde un nodo en
+#    específico como la matriz de adyacencia se tomó directamente de dat$Y en este caso
+#    se corresponde con el in degree, el out degree y el degree total. 
 
 par(mfrow = c(1,2), mar = c(5,4.5,4,1))
 plot(table(factor(V(g)$degreein, levels = 0:130))/130, type = 'h' ,
@@ -378,7 +413,7 @@ abline(h = seq(0,0.55,0.05),col = adjustcolor('darkgray', alpha = 0.9),lty = 'da
 mtext(texto, side = 3, cex = 1, line = -2, adj = 0.98, family = 'courier', font = 2, col = 'black')
 
 
-# == (D) Realice un dispersograma de los grados de salida contra los grados de entrada: 
+# ======> (D) REALICE UN DISPERSOGRAMA DE LOS GRADOS DE SALIDA CONTRA LOS GRADOS DE ENTRADA: 
 
 par(mar = c(5,4,4,2), mfrow = c(1,1))
 
@@ -406,7 +441,7 @@ corrPaises = cov(V(g)$degreein, V(g)$degreeout)/(sdIn * sdOut)
 mtext(paste0('Correlación: ', round(corrPaises, 4)), side = 3, cex = 1, line = -1.1, 
       adj = 0.02, family = 'courier', font = 2, col = 'black')
 
-# == (E) Identifique los países más activos
+# ======> (E) IDENTIFIQUE LOS PAÍSES MÁS ACTIVOS
 
 
 Top10Soc = head(A, n = 10)
@@ -419,9 +454,24 @@ Top10Pop = A |>
 
 
 # ============================= PUNTO 8 ========================================
-G = simplify(g)
-G = subgraph(G, vids = V(G)[V(G)$degree != 0])
-G = as_undirected(G)
+# Considere los datos relacionales acerca de los conflictos internacionales del 
+# archivo conflict.RData despúes de simetrizarla débilmente y remover los nodos 
+# aislados:
+# ==============================================================================
+
+G = subgraph(g, vids = V(g)[V(g)$degree != 0])  # Quitar nodos aislados
+G = as_undirected(G, mode = 'collapse')         # Simetrizar débilmente la red (Ver ?as_undirected)
+Pesos = c()                                     # El peso de las aristas es la cantidad de guerras entre países.
+for (i in E(G)){
+  Pesos = c(Pesos, 
+            dat$Y[get.edgelist(G)[i, 1], get.edgelist(G)[i, 2]] + 
+            dat$Y[get.edgelist(G)[i, 2], get.edgelist(G)[i, 1]])
+}
+E(G)$weight = Pesos
+
+# ======> (A) HACER UNA VISUALIZACIÓN DECORADA DE LA RED:
+
+# == Creación de grupos para cada vértice en base al índice de democracia
 
 V(G)$Faction = ifelse(V(G)$polity > 0, 'Positive', 'Negative')
 Positive = V(G)[Faction == 'Positive']
@@ -435,7 +485,8 @@ V(G)$color = adjustcolor('darkslategray4', alpha = 0.55)
 V(G)$color[V(G)$polity > 0] = adjustcolor('olivedrab4', alpha = 0.55)
 V(G)$color[V(G)$polity < 0] = adjustcolor('coral3', alpha = 0.55)
 
-# Grafo que tiene en cuenta las facciones creadas artificialmente:
+# == GRÁFICO DECORADO
+
 faccionesG = G
 E(faccionesG)$weight = 5
 for(i in unique(V(faccionesG)$Faction)[1:2]) {
@@ -449,23 +500,27 @@ rotate_layout <- function(layout, theta) {
   t(rotation_matrix %*% t(layout))
 }
 
-# layout_faction = rotate_layout(layout_faction, (1 * pi)/4)
 set.seed(1)
-layout_faction = layout_with_graphopt(faccionesG)
-layout_faction = rotate_layout(layout_faction, - 1.35 * pi/4)
+layout_faction = layout_with_graphopt(faccionesG)                       # Posición general
+layout_faction = rotate_layout(layout_faction, - 1.35 * pi/4)           # La posición de todos los nodos se rota
+# Se separan los nodos de democracia positiva y los de democracia negativa un poco más
+layout_faction[which(V(G)$Faction == 'Positive'), 1] = layout_faction[which(V(G)$Faction == 'Positive'), 1] - 25
+nombres = ifelse(V(G)$labels %in% names(sort(-degree(G)))[1:10],        # Se asignarán nombres al top 10 de países que han entrado en guerra con más países
+                 V(G)$labels, NA)
+nombres[V(G)$Faction == 'Zero'] = V(G)$labels[V(G)$Faction == 'Zero']   # Y al país con índice de democracia cero.
 
 par(mar = c(0,0,3,8), mfrow = c(1,1))
 plot.igraph(G, layout = layout_faction, 
             vertex.size = 4.5 * sqrt(degree(G)),
-            vertex.label = ifelse(V(G)$labels %in% names(sort(-degree(G)))[1:10],
-                                  V(G)$labels, NA),
+            vertex.label = nombres,
             vertex.label.cex = 0.8,
             vertex.label.family = 'courier',
             vertex.label.font = 2,
             vertex.label.color = 'black',
             vertex.frame.color = adjustcolor(V(G)$color, alpha = 1),
-            vertex.frame.size = 2,
-            edge.arrow.size = 0.2, edge.curve = 0,
+            vertex.frame.width = 1.5,
+            edge.width = E(G)$weight/1.5, edge.curve = 0,
+            edge.color = adjustcolor(E(G)$color, alpha = 0.7),
             xpd = T)
 title(main = 'Grupos por índice de democracia',
       family = 'courier', font = 2, col = 'black', cex.main = 1.5)
@@ -473,7 +528,7 @@ clue = c('Índice de democracia > 0',
          'Índice de democracia > 0',
          'Índice de democracia = 0')
 par(family = 'courier', font = 2)
-legend(x = 1.3, y = 0.7, 
+legend(x = 1.2, y = 1.1, 
        title = 'Grupos',
        title.font = 2,
        title.adj = 0.8,
@@ -487,7 +542,7 @@ legend(x = 1.3, y = 0.7,
 clue = c('Negativo - Negativo',
          'Negativo - Positivo',
          'Positivo - Positivo')
-legend(x = 1.45, y = 0, 
+legend(x = 1.3, y = 0.7, 
        title = 'Relaciones',
        title.font = 2,
        title.adj = 0.8,
@@ -504,8 +559,8 @@ texto = paste0('La agrupación mostrada en la\n',
                'decir, no debe tomarse como una\n',
                'comunidad generada por cercanía\n',
                'ni nada que se le parezca.', sep = '')
-mtext(texto, cex = 0.7, side = 1, line = -7, padj = 1, adj = 1,
-      font = 1, las = 1)
+mtext(texto, cex = 0.8, side = 1, line = -7, padj = 1, adj = 0.98,
+      font = 2, las = 1)
 
 # Ahí una diferencia en el grado por calificación política
 
@@ -515,6 +570,22 @@ A = rbind(A, c('P - N',sum(E(G)$color == adjustcolor('darkgray', alpha = 0.7))/1
 A = rbind(A, c('P - P', sum(E(G)$color == adjustcolor('olivedrab4', alpha = 0.9))/1.6))
 colnames(A) = c('Tipo de relación', 'Porcentaje')
 # xtable::xtable(A)
+
+# == Con el fin de revisar si el índice de democracia tiene alguna correlación con
+#    la formación de guerras se calcula la asortatividad tanto nominal como cuantitativa.
+#    El país de índice cero se toma como positivo para no tener en cuenta una 
+#    categoría con un sólo individuo.
+
+facciones = table(V(G)$Faction)
+# xtable::xtable(facciones)
+V(G)$Faction[V(G)$Faction == 'Zero'] = 'Positive'
+Cualitativa = assortativity_nominal(G, types = ifelse(V(G)$Faction == 'Positive', 1, 2), normalized = T, directed = F)
+Cuantitativa = assortativity(G, values = V(G)$polity, normalized = T, directed = F)
+Asortatividad = rbind('Cualitativa' = Cualitativa,
+                     'Cuantitativa' = Cuantitativa)
+colnames(Asortatividad) = 'Asortatividad'
+xtable::xtable(Asortatividad)
+
 
 # == (B) Caracterización estructural y local. 
 
@@ -576,6 +647,13 @@ for (i in colnames(A)[2:5]){
 }
 
 # ============================= PUNTO 7 ========================================
+# Para todos los vértices de los cuatro grafos que se presentan a continuación, 
+# calcular el grado y las medidas de centralidad. Para cada grafo completar e
+# interpretar la siguiente tabla. Interpretar los resultados.
+# ==============================================================================
+
+# == Se guardan todos los grafos en una lista para simplicidad de cálculo de las
+#    medidas solicitadas.
 
 Punto7 = list()
 empty = make_empty_graph(n = 5, directed = F)
